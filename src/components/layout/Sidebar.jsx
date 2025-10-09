@@ -44,6 +44,11 @@ const Sidebar = ({ collapsed }) => {
           roles: ["Admin", "Superadmin", "Employee", "Team Leader"],
           children: [
             {
+              key: "/eodreport",
+              label: "EOD Report",
+              roles: ["Admin", "Superadmin", "Team Leader", "Employee"],
+            },
+            {
               key: "/dashboard/deals",
               label: "Leads Dashboard",
               roles: ["Admin", "Superadmin"],
@@ -53,14 +58,10 @@ const Sidebar = ({ collapsed }) => {
               label: "Task Dashboard",
               roles: ["Admin", "Superadmin", "Team Leader", "Employee"],
             },
-            {
-              key: "/eodreport",
-              label: "EOD Report",
-              roles: ["Admin", "Superadmin", "Team Leader", "Employee"],
-            },
+            
             {
               key: "/attendance",
-              label: "Leads Dashboard",
+              label: "TimeSheet",
               roles: ["Admin", "Superadmin", "Team Leader", "Employee"],
             },
           ],
