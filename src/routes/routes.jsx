@@ -12,7 +12,7 @@ const InvoiceDashboard = React.lazy(() => import('../pages/invoice/InvoiceDashbo
 const Login = React.lazy(() => import('../pages/Login'));
 const Profile = React.lazy(() => import('../pages/Profile'));
 const Settings = React.lazy(() => import('../pages/Settings'));
-
+/*  */
 const QuotationPage = React.lazy(() => import('../pages/quotation/QuotationPage'));
 const QuotationForm = React.lazy(() => import('../pages/quotation/QuotationForm'));
 const QuotationList = React.lazy(() => import('../pages/quotation/QuotationList'));
