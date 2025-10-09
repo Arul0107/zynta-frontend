@@ -125,7 +125,7 @@ const NotesDrawer = ({ visible, onClose, account, invoice, refreshInvoices, refr
           <Button
             htmlType="submit"
             type="primary"
-             style={{ backgroundColor: '#ef7a1b', borderColor: '#orange', color: 'white' }}
+             style={{ backgroundColor: '#0E2B43', borderColor: '#orange', color: 'white' }}
             icon={<SendOutlined />}
             block
           >

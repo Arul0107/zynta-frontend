@@ -1,0 +1,258 @@
+/* -------------------------------------------------------------------------- */
+/* Global Container & Fonts */
+/* -------------------------------------------------------------------------- */
+
+/* Apply Inter font and clean background */
+
+
+
+/* -------------------------------------------------------------------------- */
+/* Card Styling (Apple UI - Minimal and Elevated) */
+/* -------------------------------------------------------------------------- */
+/* =================================================================
+   CSS: REACT DATEPICKER STYLES FOR ANTD
+   ================================================================= */
+
+/* 1. Fix z-index issue so the calendar is visible above the Modal */
+.react-datepicker-popper {
+    z-index: 1050; 
+}
+
+/* 2. Style the main calendar container to match Ant Design look */
+.react-datepicker {
+    /* Inherit Ant Design font */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    /* Match Ant Design border radius */
+    border-radius: 6px; 
+    border: 1px solid #d9d9d9; 
+    /* Use a standard Ant Design shadow */
+    box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05); 
+}
+
+/* 3. Style the header/month container */
+.react-datepicker__header {
+    background-color: #fafafa; /* Match Ant Design default background */
+    border-bottom: 1px solid #f0f0f0; 
+    padding-top: 8px;
+    border-radius: 6px 6px 0 0;
+}
+
+/* 4. Style the selected day */
+.react-datepicker__day--selected {
+    background-color: #1890ff !important; /* Ant Design primary blue */
+    color: white !important;
+    border-radius: 3px;
+}
+
+/* 5. Style the currently highlighted day (keyboard navigation) */
+.react-datepicker__day--keyboard-selected {
+    background-color: #e6f7ff !important; /* Light blue hover */
+    color: rgba(0, 0, 0, 0.85) !important;
+}
+
+/* 6. Style day hover */
+.react-datepicker__day:hover {
+    border-radius: 3px;
+    background-color: #f5f5f5;
+}
+
+/* 7. Ensure text color is dark */
+.react-datepicker__day-name, 
+.react-datepicker__current-month {
+    color: rgba(0, 0, 0, 0.85); 
+}
+.task-card {
+    border-radius: 14px; /* More rounded corners */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); /* Subtle shadow for depth */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: none;
+    overflow: hidden;
+    min-height: 220px; /* Consistent height */
+}
+
+.task-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); /* Lift on hover */
+    transform: translateY(-4px);
+}
+
+/* Overdue Card border highlight */
+.task-card.overdue {
+    border-left: 6px solid #ff3b30; /* iOS Red */
+}
+
+/* Hide default AntD head styles since we are using a custom header */
+.task-card .ant-card-head {
+    display: none;
+}
+
+/* Custom Header Flex for Tag and Edit Button */
+.card-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.edit-button {
+    font-weight: 600;
+    color: #007aff; /* iOS Blue */
+    padding: 0;
+}
+
+/* Divider line for separation */
+.card-divider {
+    height: 1px;
+    background-color: #f0f0f0;
+    margin: 10px 0;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Detail Lines */
+/* -------------------------------------------------------------------------- */
+
+.task-info-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+.task-info-line .ant-typography {
+    color: #4a4a4a;
+    font-weight: 500;
+}
+.task-info-label {
+    font-size: 11px;
+    font-weight: 400;
+    color: #8e8e93; /* iOS Secondary text */
+}
+
+/* Due Date Highlight */
+.task-due-date-info {
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 10px !important;
+    display: flex;
+    align-items: center;
+    color: #555;
+    padding-top: 5px;
+}
+
+.overdue-text {
+    color: #ff3b30 !important; /* Make overdue text strongly red */
+}
+
+/* -------------------------------------------------------------------------- */
+/* Filter Card & Mobile Adjustments */
+/* -------------------------------------------------------------------------- */
+
+.filter-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+/* Adjust title size for mobile */
+@media (max-width: 768px) {
+    .task-management-container .ant-typography h4 {
+        font-size: 18px !important;
+    }
+    
+    .task-card {
+        min-height: auto; /* Allow height to adjust naturally on mobile */
+    }
+}
+/* General Kanban Board Setup */
+.kanban-board-row {
+  /* Ensure the row doesn't wrap horizontally beyond the container for a true Kanban feel */
+  flex-wrap: nowrap !important;
+  overflow-x: auto; /* Allow horizontal scrolling if columns exceed screen width */
+  padding-bottom: 10px; /* Space for scrollbar */
+}
+
+.kanban-column {
+  /* Lock the column width and make sure it doesn't flex excessively */
+  min-width: 280px;
+  max-width: 350px;
+  flex-shrink: 0; /* Prevent columns from shrinking */
+  height: 100%; /* Important for consistent column height */
+}
+
+.kanban-column-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.kanban-column-card .ant-card-body {
+  flex-grow: 1; /* Make the body take up remaining space */
+  overflow-y: auto; /* Allow vertical scrolling within the task list */
+}
+
+/* Task Card Styling */
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Space between individual task cards */
+  padding-top: 10px;
+}
+
+.task-card-item {
+  margin-bottom: 0; /* Task cards inside the column should not have external margin */
+  border-left: 5px solid transparent; /* default border */
+}
+
+/* Overdue Task Highlight */
+.task-card-item.overdue {
+  border-left-color: #f5222d; /* Red border for overdue tasks */
+  box-shadow: 0 0 5px rgba(245, 34, 45, 0.3);
+}
+
+.overdue-text {
+  color: #f5222d !important;
+  font-weight: 600;
+}
+
+/* Internal Card Layout */
+.card-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.card-divider {
+  height: 1px;
+  background-color: #f0f0f0;
+  margin: 6px 0;
+}
+
+.task-info-line {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+}
+
+.task-info-label {
+  font-weight: 500;
+  margin-left: 6px;
+  margin-right: 4px;
+  min-width: 50px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.task-due-date-info {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.85);
+  font-weight: 500;
+}
+
+/* Adjustments for the Filter Card */
+.filter-card .ant-form-item {
+    margin-bottom: 0 !important;
+}
+
+/* Hide the status filter since it's now a Kanban board */
+.filter-card .ant-col:nth-child(3) {
+    /* If you keep the col, ensure its children are not visible */
+    display: none;
+}

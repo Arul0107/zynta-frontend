@@ -193,7 +193,7 @@ const CompanyProfile = () => {
           {" "}
           {/* Align button to the right */}
           <Button type="primary"
-           style={{ backgroundColor: '#ef7a1b', borderColor: '#orange', color: 'white' }}
+           style={{ backgroundColor: '#0E2B43', borderColor: '#orange', color: 'white' }}
            htmlType="submit">
             Save Changes
           </Button>

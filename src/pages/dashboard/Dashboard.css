@@ -111,7 +111,7 @@
 
 .ant-table-thead > tr > th {
   background-color: #e6f7ff; /* Light blue header for tables */
-  color: #ef7a1b; /* Ant Design blue text */
+  color: #0E2B43; /* Ant Design blue text */
   font-weight: 600;
   border-bottom: 1px solid #a0d911; /* Green border for header */
 }
@@ -146,12 +146,12 @@
 }
 
 .dashboard-select .ant-select-arrow {
-  color: #ef7a1b;
+  color: #0E2B43;
 }
 
 /* Link styles within cards */
 .ant-card-extra a {
-  color: #ef7a1b;
+  color: #0E2B43;
   font-weight: 500;
 }
 

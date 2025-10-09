@@ -217,7 +217,7 @@ const CompanyLogo = () => {
         onClick={() => {
           message.info('Saving all image settings...');
         }}
-        style={{backgroundColor: '#ef7a1b', borderColor: '#orange', color: 'white' , marginTop: 30, display: 'block', margin: '30px auto 0' }}
+        style={{backgroundColor: '#0E2B43', borderColor: '#orange', color: 'white' , marginTop: 30, display: 'block', margin: '30px auto 0' }}
         disabled={logoLoading || signatureLoading}
       >
         Save All Images

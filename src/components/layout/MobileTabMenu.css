@@ -23,11 +23,11 @@
 }
 
 .tab-item:hover {
-  color: #ef7a1b;
+  color: #0E2B43;
 }
 
 .active-tab {
-  color: #ef7a1b;
+  color: #0E2B43;
   background-color: #fff7f0;
   border-radius: 10px;
   margin: 4px 10px;

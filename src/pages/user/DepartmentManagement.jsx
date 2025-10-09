@@ -98,7 +98,7 @@ const DepartmentManagement = ({ departments, fetchDepartments, fetchTeams, fetch
         {(isSuperadmin || isAdmin) && (
           <Button
             type="primary"
-            style={{ backgroundColor: '#ef7a1b', borderColor: '#orange', color: 'white' }}
+            style={{ backgroundColor: '#0E2B43', borderColor: '#orange', color: 'white' }}
             icon={<PlusOutlined />}
             onClick={openDrawerForCreate}
           >
@@ -125,7 +125,7 @@ const DepartmentManagement = ({ departments, fetchDepartments, fetchTeams, fetch
             <Button onClick={() => setDrawerOpen(false)} style={{ marginRight: 8 }}>Cancel</Button>
             <Button
               type="primary"
-              style={{ backgroundColor: '#ef7a1b', borderColor: '#orange', color: 'white' }}
+              style={{ backgroundColor: '#0E2B43', borderColor: '#orange', color: 'white' }}
               onClick={handleDrawerSubmit}
             >
               {editingDepartment ? 'Update' : 'Create'}

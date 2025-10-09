@@ -199,7 +199,7 @@ const FollowUpDrawer = ({ visible, onClose, account, refreshAccounts }) => {
         />
         <Button
           type="primary"
-          style={{ marginTop: 10, backgroundColor: '#ef7a1b', borderColor: '#ef7a1b', color: 'white' }}
+          style={{ marginTop: 10, backgroundColor: '#0E2B43', borderColor: '#0E2B43', color: 'white' }}
           block
           onClick={handleAddOrUpdate}
           loading={loading}

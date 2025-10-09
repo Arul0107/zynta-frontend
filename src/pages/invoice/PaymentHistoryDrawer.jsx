@@ -247,7 +247,7 @@
                   <DatePicker style={{ width: '100%' }} defaultValue={dayjs()} format="DD/MM/YYYY" />
                 </Form.Item>
                 <Button type="primary"
-                 style={{ backgroundColor: '#ef7a1b', borderColor: '#orange', color: 'white' }}
+                 style={{ backgroundColor: '#0E2B43', borderColor: '#orange', color: 'white' }}
                  htmlType="submit" loading={loading}>Add Payment</Button>
               </Space>
             </Form>

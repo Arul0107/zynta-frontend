@@ -20,7 +20,7 @@
 
 /* You can also define utility-like classes that aren't direct Tailwind applies */
 .text-gradient-blue-purple {
-  background-image: linear-gradient(to right, #ef7a1b, #ef7a1b); /* Indigo to Purple */
+  background-image: linear-gradient(to right, #0E2B43, #0E2B43); /* Indigo to Purple */
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }

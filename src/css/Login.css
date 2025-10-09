@@ -24,7 +24,7 @@
 .login-title {
   font-size: 28px;
   font-weight: bold;
-  color: #f48d41;
+  color: #0E2B43;
   margin-bottom: 5px;
 }
 
@@ -40,12 +40,12 @@
 }
 
 .forgot-password {
-  color: #f48d41;
+  color: #0E2B43;
   font-size: 13px;
 }
 
 .login-button {
-  background-color: #f48d41;
+  background-color: #0E2B43;
   border: none;
   height: 40px;
 }

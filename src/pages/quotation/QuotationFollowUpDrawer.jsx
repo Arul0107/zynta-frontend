@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Drawer, Button, Input, DatePicker, List, Typography, Divider, Modal, Spin
+  Drawer, Button, Input, DatePicker, Tabs, List, Typography, Divider, Modal
 } from 'antd';
-import axios from '../../api/axios';
+import axios from '../../api/axios'; // Adjust path if necessary
 import { toast } from 'react-hot-toast';
 import moment from 'moment';
-import { UserOutlined, ClockCircleOutlined, MessageOutlined } from '@ant-design/icons';
 
 const { TextArea } = Input;
+const { TabPane } = Tabs;
 const { Text } = Typography;
 
 /**
@@ -25,200 +25,118 @@ const QuotationFollowUpDrawer = ({ visible, onClose, quotation, refreshQuotation
   const [followupDate, setFollowupDate] = useState(null);
   const [loading, setLoading] = useState(false);
   const [followUps, setFollowUps] = useState([]);
-  const [editingFollowUp, setEditingFollowUp] = useState(null);
-  const [allUsers, setAllUsers] = useState([]);
-  const [usersLoading, setUsersLoading] = useState(false);
+  const [editingIndex, setEditingIndex] = useState(null);
 
-  // Function to get the currently logged-in user's email
-  const getCurrentUserEmail = () => {
-    try {
-      const user = JSON.parse(localStorage.getItem('user'));
-      return user?.email || 'Unknown';
-    } catch {
-      return 'Unknown';
-    }
-  };
-
-  // Effect to fetch follow-ups and users when the drawer becomes visible or quotation changes
+  // Fetch follow-ups when the drawer becomes visible or the quotation changes
   useEffect(() => {
     if (visible && quotation?._id) {
       fetchFollowUps();
-      fetchAllUsers();
-    } else {
-      setFollowUps([]);
-      setEditingFollowUp(null);
-      setComment('');
-      setFollowupDate(null);
-      setAllUsers([]);
     }
   }, [visible, quotation]);
 
-  const fetchAllUsers = async () => {
-    setUsersLoading(true);
-    try {
-      const res = await axios.get('/api/users');
-      if (Array.isArray(res.data)) {
-        setAllUsers(res.data);
-      } else {
-        console.warn("API for users did not return an array:", res.data);
-        setAllUsers([]);
-      }
-    } catch (err) {
-      console.error("Failed to fetch users:", err);
-      toast.error("Could not load user details for display.");
-      setAllUsers([]);
-    } finally {
-      setUsersLoading(false);
-    }
-  };
-
-  const getUserDisplayName = (userIdOrObject) => {
-    if (!userIdOrObject) return 'Unknown User';
-
-    if (typeof userIdOrObject === 'object' && userIdOrObject !== null) {
-      return userIdOrObject.name || userIdOrObject.email || 'Unknown User';
-    }
-
-    const user = allUsers.find(u => (u._id === userIdOrObject) || (u.id === userIdOrObject));
-    return user ? (user.name || user.email || `User ID: ${userIdOrObject}`) : `Unknown User (ID: ${userIdOrObject})`;
-  };
-
-
+  /**
+   * Fetches the follow-ups for the current quotation from the backend.
+   */
   const fetchFollowUps = async () => {
-    if (!quotation?._id) return;
-    setLoading(true);
     try {
-      const response = await axios.get(`/api/quotations/${quotation._id}/followups`);
-      setFollowUps(response.data.sort((a, b) => moment(b.createdAt).diff(moment(a.createdAt))));
-    } catch (error) {
-      console.error("Error fetching follow-ups:", error);
-      toast.error('Failed to fetch follow-ups.');
-    } finally {
-      setLoading(false);
+      const res = await axios.get(`/api/quotations/${quotation._id}/followups`);
+      setFollowUps(res.data || []);
+    } catch (err) {
+      console.error("Failed to fetch follow-ups for quotation:", err);
+      toast.error('Failed to fetch follow-ups for this quotation.');
     }
   };
 
-  const handleAddOrUpdate = async () => {
-    if (!followupDate || !comment.trim()) {
-      toast.error('Please select a date and enter a note for the follow-up.');
+  /**
+   * Handles adding a new follow-up or updating an existing one.
+   * Performs validation, constructs payload, and calls the appropriate API.
+   */
+  const handleAddOrUpdate = () => {
+    if (!comment || !followupDate) {
+      toast.error('Please fill in both date and note fields.');
       return;
     }
-    setLoading(true);
-    try {
-      let request;
-      const currentUserData = JSON.parse(localStorage.getItem('user'));
-      const addedByUserId = currentUserData?._id || currentUserData?.id; // Use _id first, then id
 
-      if (!addedByUserId) {
-        toast.error('User information not found. Please log in.');
-        setLoading(false);
-        return;
-      }
-
-      const payload = {
-        date: moment(followupDate).toISOString(),
-        note: comment.trim(),
-        addedBy: addedByUserId,
-      };
-
-      if (editingFollowUp === null) {
-        request = axios.post(`/api/quotations/${quotation._id}/followups`, payload);
-      } else {
-        request = axios.put(`/api/quotations/${quotation._id}/followups/${editingFollowUp._id}`, payload);
-      }
-
-      request
-        .then(() => {
-          toast.success(editingFollowUp === null ? 'Follow-up added successfully!' : 'Follow-up updated successfully!');
-          setComment('');
-          setFollowupDate(null);
-          setEditingFollowUp(null);
-          fetchFollowUps();
-          if (typeof refreshQuotations === 'function') {
-            refreshQuotations();
-          }
-        })
-        .catch((error) => {
-          console.error("Error saving follow-up:", error);
-          toast.error(`Error saving follow-up: ${error.response?.data?.message || error.message}`);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    } catch (error) {
-      console.error("Error preparing follow-up data:", error);
-      toast.error('An unexpected error occurred.');
-      setLoading(false);
+    const user = JSON.parse(localStorage.getItem('user'));
+    const addedBy = user?._id; // Ensure 'addedBy' is sent (user ID from localStorage)
+    if (!addedBy) {
+      toast.error('User information not found. Please log in.');
+      return;
     }
+
+    setLoading(true);
+
+    const payload = {
+      date: followupDate.format('YYYY-MM-DD'),
+      note: comment,
+      addedBy // The ID of the user adding/updating the follow-up
+    };
+
+    const request = editingIndex === null
+      ? axios.post(`/api/quotations/${quotation._id}/followups`, payload) // POST for new
+      : axios.put(`/api/quotations/${quotation._id}/followups/${editingIndex}`, payload); // PUT for update
+
+    request
+      .then(() => {
+        toast.success(editingIndex === null ? 'Follow-up added successfully!' : 'Follow-up updated successfully!');
+        setComment(''); // Clear input fields
+        setFollowupDate(null);
+        setEditingIndex(null); // Reset editing state
+        fetchFollowUps(); // Refresh the list of follow-ups
+        refreshQuotations(); // Refresh the main quotation list
+      })
+      .catch((err) => {
+        console.error("Error saving follow-up:", err);
+        toast.error(err?.response?.data?.message );
+      })
+      .finally(() => setLoading(false));
   };
 
-  const handleDelete = (followUpId) => {
-    Modal.confirm({
-      title: 'Are you sure you want to delete this follow-up?',
-      content: 'This action cannot be undone.',
-      okText: 'Yes',
-      okType: 'danger',
-      cancelText: 'No',
-      onOk: async () => {
-        setLoading(true);
-        try {
-          await axios.delete(`/api/quotations/${quotation._id}/followups/${followUpId}`);
-          toast.success('Follow-up deleted successfully!');
-          fetchFollowUps();
-          if (typeof refreshQuotations === 'function') {
-            refreshQuotations();
-          }
-        } catch (error) {
-          console.error("Error deleting follow-up:", error);
-          toast.error('Failed to delete follow-up.');
-        } finally {
-          setLoading(false);
-        }
-      },
-    });
-  };
+  /**
+   * Sets up the drawer for editing an existing follow-up.
+   * @param {number} index - The index of the follow-up to edit in the `followUps` array.
+   */
+ 
 
-  const handleEdit = (item) => {
-    setComment(item.note);
-    setFollowupDate(moment(item.date));
-    setEditingFollowUp(item);
-  };
+  /**
+   * Handles the deletion of a follow-up after confirmation.
+   * @param {number} index - The index of the follow-up to delete in the `followUps` array.
+   */
+ 
 
-  const renderFollowUpItem = (item) => (
+  // Filter and sort follow-ups by date for display in tabs
+  const today = moment().format('YYYY-MM-DD');
+  const sorted = [...followUps].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  const todayFollowUps = sorted.filter(f =>
+    moment(f.date).format('YYYY-MM-DD') === today
+  );
+  const upcoming = sorted.filter(f =>
+    moment(f.date).isAfter(today, 'day')
+  );
+  const past = sorted.filter(f =>
+    moment(f.date).isBefore(today, 'day')
+  );
+
+  /**
+   * Renders a single follow-up item for the Ant Design List component.
+   * @param {object} item - The follow-up object to render.
+   * @param {number} actualIndex - The original index of the item in the `followUps` array (needed for edit/delete actions).
+   * @returns {JSX.Element} The rendered List.Item.
+   */
+  const renderFollowUpItem = (item, actualIndex) => (
     <List.Item
-      // actions={[
-      //   <Button key="edit" type="link" onClick={() => handleEdit(item)}>Edit</Button>,
-      //   <Button key="delete" type="link" danger onClick={() => handleDelete(item._id)}>Delete</Button>,
-      // ]}
-      // style={{
-      //   borderBottom: 'none',
-      //   paddingBottom: '0px',
-      //   marginBottom: '15px',
-      //   alignItems: 'flex-start',
-      // }}
+      actions={[
+      ]}
     >
-      <div style={{
-        backgroundColor: '#f0f2f5',
-        borderRadius: '12px',
-        padding: '10px 15px',
-        maxWidth: 'calc(100% - 80px)',
-        flexGrow: 1,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-          <UserOutlined style={{ marginRight: '5px', color: '#888' }} />
-          <Text strong style={{ marginRight: '10px', color: '#333' }}>
-            {/* Using the helper function to get the user display name from fetched users */}
-            {getUserDisplayName(item.addedBy)}
-          </Text>
-          <ClockCircleOutlined style={{ marginRight: '5px', color: '#888' }} />
-          <Text type="secondary" style={{ fontSize: '0.8em' }}>
-            {moment(item.createdAt).format('DD/MM/YYYY, h:mm:ss A')}
-          </Text>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-            <MessageOutlined style={{ marginRight: '8px', marginTop: '3px', color: '#555' }} />
-            <Text style={{ flexGrow: 1 }}>{item.note}</Text>
-        </div>
+      <div>
+        <Text strong>
+          {moment(item.date).format('DD-MM-YYYY')}
+        </Text><br />
+        {item.note}<br />
+        <Text type="secondary">
+          By {item.addedBy?.name || item.addedBy?.email || 'Unknown User'}
+        </Text>
       </div>
     </List.Item>
   );
@@ -228,18 +146,15 @@ const QuotationFollowUpDrawer = ({ visible, onClose, quotation, refreshQuotation
       title={`Follow-ups for Quotation: ${quotation?.quotationNumber || 'N/A'}`}
       open={visible}
       onClose={() => {
-        setEditingFollowUp(null);
+        // Reset state when closing the drawer
+        setEditingIndex(null);
         setComment('');
         setFollowupDate(null);
-        onClose();
+        onClose(); // Call parent onClose handler
       }}
       width={720}
     >
       <div style={{ marginBottom: 20 }}>
-        {/* Display current user's email near the input fields */}
-        <Text type="secondary" style={{ marginBottom: 8, display: 'block', fontSize: '0.9em' }}>
-            Adding follow-up as: <Text strong>{getCurrentUserEmail()}</Text>
-        </Text>
         <DatePicker
           style={{ width: '100%', marginBottom: 8 }}
           format="DD-MM-YYYY"
@@ -255,28 +170,39 @@ const QuotationFollowUpDrawer = ({ visible, onClose, quotation, refreshQuotation
         />
         <Button
           type="primary"
-          style={{ marginTop: 10, backgroundColor: '#ef7a1b', borderColor: '#ef7a1b', color: 'white' }}
           block
           onClick={handleAddOrUpdate}
           loading={loading}
+          style={{ marginTop: 10 }}
         >
-          {editingFollowUp === null ? 'Add Follow-up' : 'Update Follow-up'}
+          {editingIndex === null ? 'Add Follow-up' : 'Update Follow-up'}
         </Button>
       </div>
 
-      <Divider>All Follow-ups ({followUps.length})</Divider>
-      {(loading || usersLoading) ? (
-        <div style={{ textAlign: 'center', padding: '20px' }}>
-          <Spin size="large" tip="Loading Follow-ups..." />
-        </div>
-      ) : (
-        <List
-          dataSource={followUps}
-          renderItem={renderFollowUpItem}
-          locale={{ emptyText: 'No follow-ups found for this quotation.' }}
-          style={{ marginTop: 16 }}
-        />
-      )}
+      <Divider>Existing Follow-ups</Divider>
+      <Tabs defaultActiveKey="today">
+        <TabPane tab={`Today's (${todayFollowUps.length})`} key="today">
+          <List
+            dataSource={todayFollowUps}
+            renderItem={(item) => renderFollowUpItem(item, followUps.indexOf(item))}
+            locale={{ emptyText: 'No follow-ups scheduled for today.' }}
+          />
+        </TabPane>
+        <TabPane tab={`Upcoming (${upcoming.length})`} key="upcoming">
+          <List
+            dataSource={upcoming}
+            renderItem={(item) => renderFollowUpItem(item, followUps.indexOf(item))}
+            locale={{ emptyText: 'No upcoming follow-ups.' }}
+          />
+        </TabPane>
+        <TabPane tab={`Past (${past.length})`} key="past">
+          <List
+            dataSource={past}
+            renderItem={(item) => renderFollowUpItem(item, followUps.indexOf(item))}
+            locale={{ emptyText: 'No past follow-ups.' }}
+          />
+        </TabPane>
+      </Tabs>
     </Drawer>
   );
 };

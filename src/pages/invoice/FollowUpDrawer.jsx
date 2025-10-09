@@ -199,7 +199,7 @@ const FollowUpDrawer = ({ visible, onClose, invoice, refreshInvoices }) => {
         />
         <Button
           type="primary"
-                      style={{ marginTop: 10 , backgroundColor: '#ef7a1b', borderColor: '#orange', color: 'white' }}
+                      style={{ marginTop: 10 , backgroundColor: '#0E2B43', borderColor: '#orange', color: 'white' }}
 
           block
           onClick={handleAddOrUpdate}

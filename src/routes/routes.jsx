@@ -1,20 +1,22 @@
-// routes.jsx
+// File: src/routes/routes.jsx
+
 import React from 'react';
 import RoleGuard from '../components/auth/RoleGuard';
 
-// Lazy-loaded pages - Correcting paths to match actual file system casing
+// Lazy-loaded pages
 const Dashboard = React.lazy(() => import('../pages/dashboard/Dashboard'));
+const EodReport = React.lazy(() => import('../pages/Attendance/EodReport'));
+const TimeSheetDashboard = React.lazy(() => import('../pages/Attendance/TimeSheetDashboard'));
+const TaskManagement = React.lazy(() => import('../pages/task/TaskManagement'));
 const InvoiceDashboard = React.lazy(() => import('../pages/invoice/invoicedashboard'));
 const Login = React.lazy(() => import('../pages/Login'));
 const Profile = React.lazy(() => import('../pages/Profile'));
 const Settings = React.lazy(() => import('../pages/Settings'));
 
-// Corrected: Using 'quotation' (lowercase) based on the provided file structure image
 const QuotationPage = React.lazy(() => import('../pages/quotation/QuotationPage'));
 const QuotationForm = React.lazy(() => import('../pages/quotation/QuotationForm'));
 const QuotationList = React.lazy(() => import('../pages/quotation/QuotationList'));
 
-// Assuming your 'Invoice' folder is still PascalCase, as per previous structure
 const InvoicePage = React.lazy(() => import('../pages/Invoice/InvoicePage'));
 const InvoiceForm = React.lazy(() => import('../pages/Invoice/InvoiceForm'));
 const InvoiceList = React.lazy(() => import('../pages/Invoice/InvoiceList'));
@@ -23,20 +25,14 @@ const Leads = React.lazy(() => import('../pages/leads/Leads'));
 const Customers = React.lazy(() => import('../pages/leads/Customers'));
 const CustomerProfile = React.lazy(() => import('../components/CustomerProfile'));
 
-// UserManagement is still imported as it's used within CombinedManagement
 const UserManagement = React.lazy(() => import('../pages/user/UserManagement'));
-// Corrected: Import DepartmentManagement and TeamManagement from their respective new folders
 const DepartmentManagement = React.lazy(() => import('../pages/user/DepartmentManagement'));
 const TeamManagement = React.lazy(() => import('../pages/user/TeamManagement'));
-const PdfToWordConverter = React.lazy(() => import('../pages/PdfToWordConverter'));
 
-// Import the new CombinedManagement component
 const CombinedManagement = React.lazy(() => import('../pages/user/CombinedManagement'));
 
-// Import the new DailyReportSubmission component
-
-
-const Product = React.lazy(() => import('../pages/product/Product'));
+const BrandService = React.lazy(() => import('../pages/product/BrandService'));
+const ZoneView = React.lazy(() => import('../pages/leads/ZoneView'));
 
 // Protected app routes
 export const appRoutes = [
@@ -45,6 +41,30 @@ export const appRoutes = [
     element: (
       <RoleGuard allowedRoles={['Admin', 'Superadmin','Employee',  'Team Leader']}>
         <Dashboard />
+      </RoleGuard>
+    ),
+  },
+  {
+    path: '/eodreport',
+    element: (
+      <RoleGuard allowedRoles={['Admin', 'Superadmin','Employee',  'Team Leader']}>
+        <EodReport />
+      </RoleGuard>
+    ),
+  },
+  {
+    path: '/taskmanage',
+    element: (
+      <RoleGuard allowedRoles={['Admin', 'Superadmin','Employee',  'Team Leader']}>
+        <TaskManagement />
+      </RoleGuard>
+    ),
+  },
+  {
+    path: '/attendance',
+    element: (
+      <RoleGuard allowedRoles={['Admin', 'Superadmin','Employee',  'Team Leader']}>
+        <TimeSheetDashboard />
       </RoleGuard>
     ),
   },
@@ -89,6 +109,14 @@ export const appRoutes = [
     ),
   },
   {
+    path: '/zone-view',
+    element: (
+      <RoleGuard allowedRoles={['Admin', 'Superadmin' , 'Team Leader', 'Employee']}>
+        <ZoneView />
+      </RoleGuard>
+    ),
+  },
+  {
     path: '/customers/:id',
     element: (
       <RoleGuard allowedRoles={['Admin', 'Superadmin' , 'Team Leader', 'Employee']}>
@@ -108,7 +136,7 @@ export const appRoutes = [
     path: '/products',
     element: (
       <RoleGuard allowedRoles={['Admin', 'Superadmin' , 'Team Leader']}>
-        <Product />
+        <BrandService />
       </RoleGuard>
     ),
   },
@@ -153,24 +181,13 @@ export const appRoutes = [
     ),
   },
   {
-    // This path now points to the combined management page
     path: '/management',
     element: (
       <RoleGuard allowedRoles={['Superadmin', 'Admin']}>
         <CombinedManagement />
       </RoleGuard>
     ),
-  },
-  {
-  path: '/pdf-to-word',
-  element: (
-    <RoleGuard allowedRoles={['Admin', 'Superadmin', 'Employee', 'Team Leader']}>
-      <PdfToWordConverter />
-    </RoleGuard>
-  ),
-},
-
-  
+  }
 ];
 
 // Public login routes

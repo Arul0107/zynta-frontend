@@ -35,7 +35,7 @@ const CombinedManagement = () => {
       setDepartments(res.data);
     } catch {
       toast.error('Failed to load departments');
-    }
+    } 
   }, []);
 
   const fetchTeams = useCallback(async () => {
@@ -82,6 +82,7 @@ const CombinedManagement = () => {
             fetchTeams={fetchTeams}
           />
         </TabPane>
+
         {(isSuperadmin || isAdmin) && (
           <TabPane tab="Department Management" key="departments">
             <DepartmentManagement
@@ -92,6 +93,7 @@ const CombinedManagement = () => {
             />
           </TabPane>
         )}
+
         {(isSuperadmin || isAdmin) && (
           <TabPane tab="Team Management" key="teams">
             <TeamManagement
@@ -104,7 +106,6 @@ const CombinedManagement = () => {
             />
           </TabPane>
         )}
-       
       </Tabs>
     </div>
   );

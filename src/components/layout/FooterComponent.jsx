@@ -9,20 +9,19 @@ const FooterComponent = () => {
     <Footer
       style={{
         textAlign: 'center',
-        backgroundColor: '#f0f2f5',
+        backgroundColor: '#132f45',
         padding: '16px 50px',
         position: 'relative',
         bottom: 0,
         width: '100%',
         borderTop: '1px solid #e8e8e8',
         fontSize: '14px',
-        color: '#555',
+        color: '#ffffffff',
       }}
     >
-      © {new Date().getFullYear()} All rights are reserved by <strong> <a href="https://megacranesindia.com/" target="_blank" rel="noopener noreferrer">MegaCrane</a></strong> | 
-      Design and developed by <strong><a href="https://acculermedia.com/" target="_blank" rel="noopener noreferrer">Acculermedia</a>
+      © {new Date().getFullYear()} All rights are reserved by <strong> <a href="https://megacranesindia.com/" target="_blank" rel="noopener noreferrer"><span className='company'>Vrism</span></a></strong> 
 
-</strong>
+
     </Footer>
   );
 };

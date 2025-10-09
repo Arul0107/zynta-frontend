@@ -5,7 +5,7 @@ import {
   UserOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import logoExpanded from "../../assets/megacrane.png";
+import logoExpanded from "../../assets/vrism.png";
 import './TopNavbar.css';
 
 const TopNavbar = ({ collapsed, setCollapsed }) => {
@@ -19,7 +19,7 @@ const TopNavbar = ({ collapsed, setCollapsed }) => {
 
   const handleProfile = () => {
     navigate('/profile');
-  };
+  };  
 
   const handleSettings = () => {
     navigate('/settings');

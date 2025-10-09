@@ -182,7 +182,7 @@ const TeamManagement = ({ teams, departments, allUsers, fetchTeams, fetchDepartm
         {(isSuperadmin || isAdmin) && (
           <Button
             type="primary"
-            style={{ backgroundColor: '#ef7a1b', borderColor: '#orange', color: 'white' }}
+            style={{ backgroundColor: '#0E2B43', borderColor: '#orange', color: 'white' }}
             icon={<PlusOutlined />}
             onClick={openDrawerForCreate}
           >
@@ -297,7 +297,7 @@ const TeamManagement = ({ teams, departments, allUsers, fetchTeams, fetchDepartm
             <Button onClick={() => setDrawerOpen(false)} style={{ marginRight: 8 }}>Cancel</Button>
             <Button
               type="primary"
-              style={{ backgroundColor: '#ef7a1b', borderColor: '#orange', color: 'white' }}
+              style={{ backgroundColor: '#0E2B43', borderColor: '#orange', color: 'white' }}
               onClick={handleDrawerSubmit}
             >
               {editingTeam ? 'Update' : 'Create'}
@@ -362,7 +362,7 @@ const TeamManagement = ({ teams, departments, allUsers, fetchTeams, fetchDepartm
             <Button onClick={() => setTransferDrawerOpen(false)} style={{ marginRight: 8 }}>Cancel</Button>
             <Button
               type="primary"
-              style={{ backgroundColor: '#ef7a1b', borderColor: '#orange', color: 'white' }}
+              style={{ backgroundColor: '#0E2B43', borderColor: '#orange', color: 'white' }}
               onClick={handleTransferSubmit}
             >
               Transfer

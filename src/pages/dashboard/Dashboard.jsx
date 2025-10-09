@@ -237,7 +237,7 @@ const Dashboard = () => {
       case 'WarmLead':
         return <ThunderboltOutlined style={{ color: '#faad14' }} />; // Orange for Warm
       case 'ColdLead':
-        return <CloudOutlined style={{ color: '#ef7a1b' }} />; // Blue for Cold
+        return <CloudOutlined style={{ color: '#0E2B43' }} />; // Blue for Cold
       case 'Other':
         return <QuestionCircleOutlined style={{ color: '#bfbfbf' }} />; // Grey for Other
       default:
@@ -732,76 +732,72 @@ const Dashboard = () => {
     }
   };
 
-  const columnsFollowups = [
-    { title: "S.No", render: (_, __, i) => i + 1,  width: 50 }, // Fixed to the left
-    {
-      title: "Business Name",
-      dataIndex: "parentName",
-      render: (text) => text.charAt(0).toUpperCase() + text.slice(1), // Capitalize first letter
-       // Fixed to the left
-      width: 180,
+ const columnsFollowups = [
+  { title: "S.No", render: (_, __, i) => i + 1,  width: 50 },
+  {
+    title: "Business Name",
+    dataIndex: "parentName",
+    render: (text) => text ? text.charAt(0).toUpperCase() + text.slice(1) : "N/A", // Added a check for 'text'
+    width: 180,
+  },
+  {
+    title: "Added By",
+    dataIndex: "addedBy",
+    render: (addedBy) => addedBy?.name || addedBy?.email || "Unknown",
+  },
+  {
+    title: "Date",
+    dataIndex: "followupDate",
+    render: (d) => (d ? dayjs(d).toDate().toLocaleDateString() : "N/A"),
+  },
+  {
+    title: "Status",
+    dataIndex: "status",
+    width: 100,
+    render: (status) => {
+      let color;
+      switch (status) {
+        case "pending":
+          color = "gold";
+          break;
+        case "completed":
+          color = "green";
+          break;
+        default:
+          color = "blue";
+      }
+      return <Tag color={color}>{status}</Tag>;
     },
-
-    {
-      title: "Added By",
-      dataIndex: "addedBy",
-      render: (addedBy) => addedBy?.name || addedBy?.email || "Unknown",
-    },
-    {
-      title: "Date",
-      dataIndex: "followupDate",
-      render: (d) => (d ? dayjs(d).toDate().toLocaleDateString() : "N/A"),
-    },
-    {
-      title: "Status", // Added Status column to follow-up table
-      dataIndex: "status",
-      width: 100, // Adjust width as needed
-      render: (status) => {
-        let color;
-        switch (status) {
-          case "pending":
-            color = "gold";
-            break;
-          case "completed":
-            color = "green";
-            break;
-          default:
-            color = "blue";
-        }
-        return <Tag color={color}>{status}</Tag>;
-
-      },
-    },
-    {
-      title: "Action",
-      key: "action",
-      render: (_, record) => <a onClick={() => showEditModal(record)}><EditOutlined /></a>,
-      // Fixed to the right
-      width: 80,
-    },
-    {
-      title: "View message",
-      dataIndex: "note",
-      width: 150, // Adjust width as needed
-      render: (note) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <span style={{
-            maxWidth: '80px', // Adjust max-width as needed
-            whiteWhiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            marginRight: '8px'
-          }}>
-          </span>
-          {note && note.length > 0 && ( // Only show tooltip if there's a comment
-            <Tooltip title={note}>
-              <EyeOutlined style={{ cursor: 'pointer', color: '#1890ff' }} />
-            </Tooltip>
-          )}
-        </div>
-      ),
-    },
-  ];
+  },
+  {
+    title: "Action",
+    key: "action",
+    render: (_, record) => <a onClick={() => showEditModal(record)}><EditOutlined /></a>,
+    width: 80,
+  },
+  {
+    title: "View message",
+    dataIndex: "note",
+    width: 150,
+    render: (note) => (
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <span style={{
+          maxWidth: '80px',
+          whiteWhiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          marginRight: '8px'
+        }}>
+        </span>
+        {note && note.length > 0 && (
+          <Tooltip title={note}>
+            <EyeOutlined style={{ cursor: 'pointer', color: '#1890ff' }} />
+          </Tooltip>
+        )}
+      </div>
+    ),
+  },
+];
 
   const columnsAccounts = [
     { title: "S.No", render: (_, __, i) => i + 1 },
@@ -957,7 +953,7 @@ const Dashboard = () => {
       </Row>
 
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={24} md={8} lg={8}>
+        <Col xs={24} sm={24} md={12} lg={12}>
           <Card
             title={
               <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -992,7 +988,7 @@ const Dashboard = () => {
           </Card>
         </Col>
         {/* Account Status Distribution Pie Chart */}
-        <Col xs={24} sm={24} md={8} lg={8}>
+        <Col xs={24} sm={24} md={12} lg={12}>
           <Card
             title={
               <div
@@ -1029,42 +1025,6 @@ const Dashboard = () => {
           </Card>
         </Col>
 
-        {/* New Lead Type Card with Icon */}
-        <Col xs={24} sm={24} md={8} lg={8}>
-          <Card
-            title={
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <TeamOutlined /> Leads by Type (This Month) ({totalLeadTypes}) {/* Updated title */}
-              </span>
-            }
-            bordered
-            style={{ height: '100%' }}
-          >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {Object.entries(leadTypeData).filter(([type]) =>
-                ['HotLead', 'WarmLead', 'ColdLead', 'Other'].includes(type)
-              ).map(([type, count]) => (
-                <div key={type} style={{
-                  display: 'flex',
-                   justifyContent: 'space-around',
-                  alignItems: 'center',
-                  padding: '10px 15px',
-                  backgroundColor: '#f0f2f5',
-                  borderRadius: '8px',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-                }}>
-                  <Typography.Text strong style={{ fontSize: 15, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    {getLeadTypeIcon(type)} {type.replace(/([A-Z])/g, ' $1').trim()}
-                  </Typography.Text>
-                  <Tag color="purple" style={{ fontSize: '14px', padding: '5px 10px', borderRadius: '4px' }}>
-                    {count}
-                  </Tag>
-                </div>
-              ))}
-
-            </div>
-          </Card>
-        </Col>
       </Row>
 
       {/* <Row gutter={[16, 16]}>

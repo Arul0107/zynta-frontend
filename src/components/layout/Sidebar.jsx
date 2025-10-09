@@ -1,3 +1,5 @@
+// File: src/components/Sidebar.jsx
+
 import { Menu } from "antd";
 import {
   DashboardOutlined,
@@ -11,13 +13,14 @@ import {
   SettingOutlined,
   UserSwitchOutlined,
   TableOutlined,
-  FileWordOutlined, // <-- Added for PDF to Word
+  FileWordOutlined,
+  PartitionOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import './sidebar.css';
 
-import logoCollapsed from "../../assets/megacranesmall.png";
-import logoExpanded from "../../assets/megacrane.png";
+import logoCollapsed from "../../assets/vrismsmall.png";
+import logoExpanded from "../../assets/vrism.png";
 
 const Sidebar = ({ collapsed }) => {
   const navigate = useNavigate();
@@ -28,12 +31,11 @@ const Sidebar = ({ collapsed }) => {
   const user = JSON.parse(localStorage.getItem("user"));
   const role = user?.role;
 
-  // Define menu structure with role-based access
   const rawMenuItems = [
     {
       key: "main-menu",
       type: "group",
-      label: collapsed ? null : "MAIN MENU",
+      label: collapsed ? null : "",
       children: [
         {
           key: "/dashboard",
@@ -43,6 +45,21 @@ const Sidebar = ({ collapsed }) => {
           children: [
             {
               key: "/dashboard/deals",
+              label: "Leads Dashboard",
+              roles: ["Admin", "Superadmin"],
+            },
+            {
+              key: "/taskmanage",
+              label: "Task Dashboard",
+              roles: ["Admin", "Superadmin", "Team Leader", "Employee"],
+            },
+            {
+              key: "/eodreport",
+              label: "EOD Report",
+              roles: ["Admin", "Superadmin", "Team Leader", "Employee"],
+            },
+            {
+              key: "/attendance",
               label: "Leads Dashboard",
               roles: ["Admin", "Superadmin", "Team Leader", "Employee"],
             },
@@ -58,31 +75,25 @@ const Sidebar = ({ collapsed }) => {
               key: "/leads",
               icon: <SolutionOutlined />,
               label: "Leads",
-              roles: ["Admin", "Employee", "Superadmin", "Team Leader"],
+              roles: ["Admin",  "Superadmin", ],
             },
             {
               key: "/customers",
               icon: <UserOutlined />,
               label: "Customers",
-              roles: ["Admin", "Employee", "Superadmin", "Team Leader"],
+              roles: ["Admin", "Superadmin", ],
             },
             {
               key: "/quotation",
               icon: <FileTextOutlined />,
               label: "Quotations",
-              roles: ["Admin", "Superadmin", "Team Leader"],
+              roles: ["Admin", "Superadmin", ],
             },
             {
               key: "/products",
               icon: <FileAddOutlined />,
               label: "Products",
-              roles: ["Admin", "Superadmin", "Team Leader"],
-            },
-            {
-              key: "/pdf-to-word",
-              icon: <FileWordOutlined />,
-              label: "PDF to Word",
-              roles: ["Admin", "Superadmin", "Team Leader"],
+              roles: ["Admin", "Superadmin", ],
             },
           ],
         },
@@ -110,7 +121,6 @@ const Sidebar = ({ collapsed }) => {
     },
   ];
 
-  // Filter logic to include only allowed menu items
   const filterByRole = (items) => {
     return items
       .map((item) => {

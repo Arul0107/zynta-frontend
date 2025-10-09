@@ -1,19 +1,16 @@
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas"; // Still imported, but not used in the refactored PDF generation
+import html2canvas from "html2canvas";
 import toast from "react-hot-toast";
-import Logo from '../../assets/megacraneq.png'; // Assuming this path is correct for your logo
+import Logo from '../../assets/megacraneq.png';
 
 // --- Helper functions ---
 const formatCurrency = (amount) => {
     const numAmount = parseFloat(amount) || 0;
-    // Use toLocaleString for Indian Rupee format, which includes commas and .00
     return `₹${numAmount.toLocaleString("en-IN", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     })}`;
 };
-
-// Add some empty lines here for visual separation
 
 const convertNumberToWords = (num) => {
     if (typeof num !== "number" || isNaN(num)) return "N/A";
@@ -24,9 +21,8 @@ const convertNumberToWords = (num) => {
     const units = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
     const teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
     const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
-    const scales = ["", "Thousand", "Lakh", "Crore"]; // Indian numbering system scales
+    const scales = ["", "Thousand", "Lakh", "Crore"];
 
-    // Helper to convert a number (0-999) to words
     const convertLessThanOneThousand = (n) => {
         if (n === 0) return "";
         let result = "";
@@ -54,26 +50,23 @@ const convertNumberToWords = (num) => {
     } else {
         let currentNum = integerPart;
         let scaleIndex = 0;
-
-        // Process chunks of two digits for Thousand, Lakh, Crore (Indian system)
         const indianScales = [
-            { limit: 1000, name: "" },       // For numbers up to 999
-            { limit: 100, name: "Thousand" }, // For numbers 1000-99999 (grouped as 100 thousand = 1 Lakh)
-            { limit: 100, name: "Lakh" },    // For numbers 1,00,000-9,99,99,999 (grouped as 100 Lakh = 1 Crore)
-            { limit: 100, name: "Crore" }    // For numbers 1,00,00,000 onwards
+            { limit: 1000, name: "" },
+            { limit: 100, name: "Thousand" },
+            { limit: 100, name: "Lakh" },
+            { limit: 100, name: "Crore" }
         ];
 
         let tempWords = [];
         for (let i = 0; i < indianScales.length && currentNum > 0; i++) {
             let chunk;
-            if (i === 0) { // First chunk is for numbers 0-999
+            if (i === 0) {
                 chunk = currentNum % indianScales[i].limit;
                 currentNum = Math.floor(currentNum / indianScales[i].limit);
-            } else { // Subsequent chunks are 2 digits for Indian system (Lakh, Crore)
+            } else {
                 chunk = currentNum % 100;
                 currentNum = Math.floor(currentNum / 100);
             }
-
             if (chunk > 0) {
                 tempWords.push(convertLessThanOneThousand(chunk) + (indianScales[i].name ? " " + indianScales[i].name : ""));
             }
@@ -89,7 +82,7 @@ const convertNumberToWords = (num) => {
     }
     result += " Only";
 
-    return result.replace(/\s+/g, ' '); // Replace multiple spaces with single space
+    return result.replace(/\s+/g, ' ');
 };
 
 // --- PDF Styling Constants ---
@@ -104,7 +97,7 @@ const pdfStyles = {
         text: "#333",
         footer: "#999",
         headerBg: "#f2f2f2",
-        tableBorder: "#000000", // Explicit black for table borders
+        tableBorder: "#000000",
     },
     fontSize: {
         companyName: 14,
@@ -118,13 +111,13 @@ const pdfStyles = {
         footer: 8,
     },
     spacing: {
-        padding: 15, // Padding from page edges
-        lineHeight: 5, // Standard line height for text
-        smallLineHeight: 3.5, // Smaller line height for address/contact details
-        headerHeight: 45, // Approximate height of the header
-        footerHeight: 15, // Approximate height of the footer (for page number)
-        cellPadding: 2, // Padding inside table cells
-        sectionGap: 10, // Gap between sections
+        padding: 15,
+        lineHeight: 5,
+        smallLineHeight: 3.5,
+        headerHeight: 45,
+        footerHeight: 15,
+        cellPadding: 2,
+        sectionGap: 10,
     },
     lines: {
         header: 0.5,
@@ -147,31 +140,25 @@ export const downloadQuotationPdf = async (record) => {
 
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
-        let y = pdfStyles.spacing.padding; // Current Y position on the PDF
+        let y = pdfStyles.spacing.padding;
 
-        // --- Helper to add header to a page ---
         const addHeader = async () => {
             const img = new Image();
             img.src = Logo;
             await new Promise(resolve => img.onload = resolve);
-
-            const imgWidth = 20; // Adjust as needed
-            const imgHeight = (img.height * imgWidth) / img.width; // Maintain aspect ratio
+            const imgWidth = 20;
+            const imgHeight = (img.height * imgWidth) / img.width;
             const imgX = pdfStyles.spacing.padding;
             const imgY = pdfStyles.spacing.padding;
-
             pdf.addImage(img, 'PNG', imgX, imgY, imgWidth, imgHeight);
-
             pdf.setFontSize(pdfStyles.fontSize.companyName);
             pdf.setTextColor(pdfStyles.colors.primary);
             pdf.setFont(pdfStyles.font.family, pdfStyles.font.bold);
             pdf.text("MEGA CRANES INDIA PRIVATE LIMITED", pdfWidth / 2, pdfStyles.spacing.padding + 5, { align: "center" });
-
             pdf.setFontSize(pdfStyles.fontSize.isoText);
             pdf.setTextColor(pdfStyles.colors.primary);
             pdf.setFont(pdfStyles.font.family, pdfStyles.font.normal);
             pdf.text("(An ISO 9001 : 2015 Certified company)", pdfWidth / 2, pdfStyles.spacing.padding + 9, { align: "center" });
-
             pdf.setFontSize(pdfStyles.fontSize.addressText);
             pdf.setTextColor(pdfStyles.colors.text);
             pdf.text("S.F. No. 2/8, 2/9, 2/11, Thelungupalayam Road, Ellapalayam (P.O), Annur, Coimbatore - 641 697.", pdfWidth / 2, pdfStyles.spacing.padding + 15, { align: "center" });
@@ -179,22 +166,18 @@ export const downloadQuotationPdf = async (record) => {
             pdf.text("E-mail : info@megacranesindia.com, marketing@megacranesindia.com", pdfWidth / 2, pdfStyles.spacing.padding + 21, { align: "center" });
             pdf.text("Website : www.megacranesindia.com", pdfWidth / 2, pdfStyles.spacing.padding + 24, { align: "center" });
             pdf.text("GST No : 33AACCM6869G1Z8      PAN No : AACCM6869G      Incorporation No : U29150TZ2009PTC015678", pdfWidth / 2, pdfStyles.spacing.padding + 27, { align: "center" });
-
             pdf.setDrawColor(pdfStyles.colors.primary);
             pdf.setLineWidth(pdfStyles.lines.header);
-            pdf.line(pdfStyles.spacing.padding, pdfStyles.spacing.padding + 32, pdfWidth - pdfStyles.spacing.padding, pdfStyles.spacing.padding + 32); // Bottom line for header
-
-            y = pdfStyles.spacing.padding + 40; // Adjust Y position after header
+            pdf.line(pdfStyles.spacing.padding, pdfStyles.spacing.padding + 32, pdfWidth - pdfStyles.spacing.padding, pdfStyles.spacing.padding + 32);
+            y = pdfStyles.spacing.padding + 40;
         };
 
-        // --- Helper to add footer to a page ---
         const addFooter = (pageNumber, totalPages) => {
             pdf.setFontSize(pdfStyles.fontSize.footer);
             pdf.setTextColor(pdfStyles.colors.footer);
             pdf.text(`Page ${pageNumber}/${totalPages}`, pdfWidth / 2, pdfHeight - pdfStyles.spacing.footerHeight + 5, { align: "center" });
         };
 
-        // --- Prepare data for the PDF ---
         const subTotalAmount = record.items?.reduce(
             (sum, item) => sum + (parseFloat(item.quantity || 0) * parseFloat(item.rate || 0)),
             0
@@ -237,17 +220,12 @@ export const downloadQuotationPdf = async (record) => {
                 { label: "VALIDITY", value: record.offerValidity || "30 days from the date of this offer." },
             ],
         };
-        // Add HSN Codes to termsData separately to handle aggregation if it was not explicitly set
         quotationContent.termsData.push({ label: "HSN CODES", value: quotationContent.hsnCodes });
 
-        // --- Page 1 Content ---
         await addHeader();
-
-        // Quotation details (left side)
         pdf.setFontSize(pdfStyles.fontSize.mainContent);
         pdf.setTextColor(pdfStyles.colors.text);
         pdf.setFont(pdfStyles.font.family, pdfStyles.font.normal);
-
         pdf.text(quotationContent.quotationNumber, pdfStyles.spacing.padding, y);
         y += pdfStyles.spacing.lineHeight * 2;
         pdf.text("To,", pdfStyles.spacing.padding, y);
@@ -267,10 +245,7 @@ export const downloadQuotationPdf = async (record) => {
         pdf.setFont(pdfStyles.font.family, pdfStyles.font.normal);
         y += pdfStyles.spacing.lineHeight;
         pdf.text(`REF: ${quotationContent.reference}`, pdfStyles.spacing.padding, y);
-
-        // Date (right side)
         pdf.text(`DATE: ${quotationContent.quotationDate}`, pdfWidth - pdfStyles.spacing.padding, pdfStyles.spacing.padding + 40, { align: "right" });
-
         y += pdfStyles.spacing.lineHeight * 2;
         pdf.setFont(pdfStyles.font.family, pdfStyles.font.bold);
         pdf.text("Dear Customer,", pdfStyles.spacing.padding, y);
@@ -281,15 +256,13 @@ export const downloadQuotationPdf = async (record) => {
         pdf.text("We, “Mega Cranes” is a Promising & Reliable Original Equipment Manufacturer of Overhead Cranes and Electric Wire Rope Hoist in South India, situated at Coimbatore more than a decade.", pdfStyles.spacing.padding, y, { maxWidth: pdfWidth - 2 * pdfStyles.spacing.padding });
         y += pdfStyles.spacing.lineHeight * 2;
         pdf.text("We are also an Authorized Crane Partner of “KITO” Japan for Electric Chain Hoist, Manual Hoist, Rope Hoist. KITO is the Worlds No.1 Chain Hoist manufacturer.", pdfStyles.spacing.padding, y, { maxWidth: pdfWidth - 2 * pdfStyles.spacing.padding });
-
         y += pdfStyles.spacing.lineHeight * 4;
         pdf.setFontSize(pdfStyles.fontSize.sectionTitle);
         pdf.setFont(pdfStyles.font.family, pdfStyles.font.bold);
         pdf.text("Annexure I - Price & Scope Details", pdfWidth / 2, y, { align: "center" });
         y += pdfStyles.spacing.lineHeight * 2;
         pdf.text("Annexure II - Terms & Conditions", pdfWidth / 2, y, { align: "center" });
-        pdf.setFontSize(pdfStyles.fontSize.mainContent); // Reset font size
-
+        pdf.setFontSize(pdfStyles.fontSize.mainContent);
         y += pdfStyles.spacing.lineHeight * 4;
         pdf.setFont(pdfStyles.font.family, pdfStyles.font.normal);
         pdf.text("We hope you will find our offer most competitive, if you have clarifications, please feel free to contact us.", pdfStyles.spacing.padding, y, { maxWidth: pdfWidth - 2 * pdfStyles.spacing.padding });
@@ -300,7 +273,6 @@ export const downloadQuotationPdf = async (record) => {
         y += pdfStyles.spacing.lineHeight;
         pdf.setFont(pdfStyles.font.family, pdfStyles.font.bold);
         pdf.text("For MEGA CRANES INDIA PVT LTD.,", pdfStyles.spacing.padding, y);
-
         y += pdfStyles.spacing.lineHeight * 3;
         pdf.text("Sivaraman.P.S", pdfStyles.spacing.padding, y);
         y += pdfStyles.spacing.lineHeight;
@@ -308,56 +280,38 @@ export const downloadQuotationPdf = async (record) => {
         pdf.text("Head – Business Development", pdfStyles.spacing.padding, y);
         y += pdfStyles.spacing.lineHeight;
         pdf.text("+91 9944039125", pdfStyles.spacing.padding, y);
-
         let pageCount = pdf.internal.getNumberOfPages();
-
-        // --- Page 2 (and subsequent pages for table) ---
         pdf.addPage();
-        y = pdfStyles.spacing.padding; // Reset Y for new page
-        await addHeader(); // Add header to new page
-
+        y = pdfStyles.spacing.padding;
+        await addHeader();
         pdf.setFontSize(pdfStyles.fontSize.sectionTitle);
         pdf.setFont(pdfStyles.font.family, pdfStyles.font.bold);
         y += pdfStyles.spacing.lineHeight;
         pdf.text("ANNEXURE - I (PRICE & SCOPE)", pdfWidth / 2, y, { align: "center" });
         y += pdfStyles.spacing.lineHeight * 2;
-
-        // Table Headers
         pdf.setFontSize(pdfStyles.fontSize.tableHeader);
         pdf.setFont(pdfStyles.font.family, pdfStyles.font.bold);
         const tableStartX = pdfStyles.spacing.padding;
         let tableY = y;
         const totalTableWidth = pdfWidth - 2 * pdfStyles.spacing.padding;
-
-        // Adjusted column widths to minimize unwanted space and for left alignment
-        const colWidthDesc = totalTableWidth * 0.45; // Description remains wide
-        const colWidthUnit = totalTableWidth * 0.20; // Unit Price - slightly reduced
-        const colWidthQty = totalTableWidth * 0.17;  // QTY - slightly increased for left align
-        const colWidthTotal = totalTableWidth * 0.18; // Total Price - slightly reduced
-
-        const headerRowHeight = 7; // Fixed height for header row
-
-        // Draw header row background
+        const colWidthDesc = totalTableWidth * 0.45;
+        const colWidthUnit = totalTableWidth * 0.20;
+        const colWidthQty = totalTableWidth * 0.17;
+        const colWidthTotal = totalTableWidth * 0.18;
+        const headerRowHeight = 7;
         pdf.setFillColor(pdfStyles.colors.headerBg);
         pdf.rect(tableStartX, tableY, totalTableWidth, headerRowHeight, "F");
-
-        pdf.setDrawColor(pdfStyles.colors.tableBorder); // Set border color for table
+        pdf.setDrawColor(pdfStyles.colors.tableBorder);
         pdf.setLineWidth(pdfStyles.lines.table);
-
-        // Header text positioning (now all left-aligned for simplicity and less space)
         pdf.text("DESCRIPTION", tableStartX + pdfStyles.spacing.cellPadding, tableY + headerRowHeight / 2, { align: "left", baseline: "middle" });
         pdf.text("UNIT PRICE", tableStartX + colWidthDesc + pdfStyles.spacing.cellPadding, tableY + headerRowHeight / 2, { align: "left", baseline: "middle" });
         pdf.text("QTY", tableStartX + colWidthDesc + colWidthUnit + pdfStyles.spacing.cellPadding, tableY + headerRowHeight / 2, { align: "left", baseline: "middle" });
         pdf.text("TOTAL PRICE", tableStartX + colWidthDesc + colWidthUnit + colWidthQty + pdfStyles.spacing.cellPadding, tableY + headerRowHeight / 2, { align: "left", baseline: "middle" });
-
-        // Draw header borders
-        pdf.rect(tableStartX, tableY, colWidthDesc, headerRowHeight); // Description
-        pdf.rect(tableStartX + colWidthDesc, tableY, colWidthUnit, headerRowHeight); // Unit Price
-        pdf.rect(tableStartX + colWidthDesc + colWidthUnit, tableY, colWidthQty, headerRowHeight); // QTY
-        pdf.rect(tableStartX + colWidthDesc + colWidthUnit + colWidthQty, tableY, colWidthTotal, headerRowHeight); // Total Price
+        pdf.rect(tableStartX, tableY, colWidthDesc, headerRowHeight);
+        pdf.rect(tableStartX + colWidthDesc, tableY, colWidthUnit, headerRowHeight);
+        pdf.rect(tableStartX + colWidthDesc + colWidthUnit, tableY, colWidthQty, headerRowHeight);
+        pdf.rect(tableStartX + colWidthDesc + colWidthUnit + colWidthQty, tableY, colWidthTotal, headerRowHeight);
         tableY += headerRowHeight;
-
-        // Items rows
         pdf.setFontSize(pdfStyles.fontSize.tableContent);
         pdf.setFont(pdfStyles.font.family, pdfStyles.font.normal);
 
@@ -366,14 +320,13 @@ export const downloadQuotationPdf = async (record) => {
             const unitPrice = parseFloat(item.rate || 0);
             const quantity = parseFloat(item.quantity || 0);
             const totalPrice = unitPrice * quantity;
-
             const descriptionLines = pdf.splitTextToSize(description, colWidthDesc - 2 * pdfStyles.spacing.cellPadding);
             const descriptionHeight = descriptionLines.length * pdfStyles.spacing.lineHeight;
             const actualRowHeight = Math.max(headerRowHeight, descriptionHeight + 2 * pdfStyles.spacing.cellPadding);
 
             if (tableY + actualRowHeight + pdfStyles.spacing.footerHeight + pdfStyles.spacing.padding > pdfHeight - pdfStyles.spacing.footerHeight) {
                 pageCount = pdf.internal.getNumberOfPages();
-                addFooter(pageCount, "N/A"); // Total pages unknown yet
+                addFooter(pageCount, "N/A");
                 pdf.addPage();
                 y = pdfStyles.spacing.padding;
                 await addHeader();
@@ -383,8 +336,6 @@ export const downloadQuotationPdf = async (record) => {
                 pdf.text("ANNEXURE - I (PRICE & SCOPE) - Continued", pdfWidth / 2, y, { align: "center" });
                 y += pdfStyles.spacing.lineHeight * 2;
                 tableY = y;
-
-                // Redraw table headers on new page
                 pdf.setFontSize(pdfStyles.fontSize.tableHeader);
                 pdf.setFont(pdfStyles.font.family, pdfStyles.font.bold);
                 pdf.setFillColor(pdfStyles.colors.headerBg);
@@ -404,22 +355,16 @@ export const downloadQuotationPdf = async (record) => {
                 pdf.setFont(pdfStyles.font.family, pdfStyles.font.normal);
             }
 
-            // Draw item row content and borders
             pdf.rect(tableStartX, tableY, colWidthDesc, actualRowHeight);
             pdf.rect(tableStartX + colWidthDesc, tableY, colWidthUnit, actualRowHeight);
             pdf.rect(tableStartX + colWidthDesc + colWidthUnit, tableY, colWidthQty, actualRowHeight);
             pdf.rect(tableStartX + colWidthDesc + colWidthUnit + colWidthQty, tableY, colWidthTotal, actualRowHeight);
-
             const textYOffset = (actualRowHeight - (descriptionLines.length * pdfStyles.spacing.lineHeight)) / 2 + pdfStyles.spacing.cellPadding;
             const singleLineTextYOffset = actualRowHeight / 2;
-
             pdf.text(descriptionLines, tableStartX + pdfStyles.spacing.cellPadding, tableY + textYOffset);
-
-            // Left-aligning all data columns
             pdf.text(formatCurrency(unitPrice), tableStartX + colWidthDesc + pdfStyles.spacing.cellPadding, tableY + singleLineTextYOffset, { align: "left", baseline: "middle" });
             pdf.text(String(quantity), tableStartX + colWidthDesc + colWidthUnit + pdfStyles.spacing.cellPadding, tableY + singleLineTextYOffset, { align: "left", baseline: "middle" });
             pdf.text(formatCurrency(totalPrice), tableStartX + colWidthDesc + colWidthUnit + colWidthQty + pdfStyles.spacing.cellPadding, tableY + singleLineTextYOffset, { align: "left", baseline: "middle" });
-
             tableY += actualRowHeight;
         }
 
@@ -427,6 +372,12 @@ export const downloadQuotationPdf = async (record) => {
         const summaryRowHeight = 7;
         pdf.setFontSize(pdfStyles.fontSize.summaryText);
         pdf.setFont(pdfStyles.font.family, pdfStyles.font.bold);
+
+        // --- Corrected Alignment Logic ---
+        // Calculate the right edge of the QTY column for the labels
+        const labelColumnX = tableStartX + colWidthDesc + colWidthUnit + colWidthQty; 
+        // Calculate the right edge of the TOTAL PRICE column for the values
+        const valueColumnX = tableStartX + totalTableWidth; 
 
         // Sub Total
         if (tableY + summaryRowHeight > pdfHeight - pdfStyles.spacing.footerHeight - pdfStyles.spacing.padding) {
@@ -438,10 +389,8 @@ export const downloadQuotationPdf = async (record) => {
             tableY = y;
         }
         pdf.rect(tableStartX, tableY, totalTableWidth, summaryRowHeight);
-        // Corrected alignment for label to be within the QTY column, right-aligned
-        pdf.text("SUB TOTAL", tableStartX + colWidthDesc + colWidthUnit + colWidthQty - pdfStyles.spacing.cellPadding, tableY + summaryRowHeight / 2, { align: "right", baseline: "middle" });
-        // Value remains right-aligned in Total Price column
-        pdf.text(formatCurrency(subTotalAmount), tableStartX + colWidthDesc + colWidthUnit + colWidthQty + colWidthTotal - pdfStyles.spacing.cellPadding, tableY + summaryRowHeight / 2, { align: "right", baseline: "middle" });
+        pdf.text("SUB TOTAL", labelColumnX - pdfStyles.spacing.cellPadding, tableY + summaryRowHeight / 2, { align: "right", baseline: "middle" });
+        pdf.text(formatCurrency(subTotalAmount), valueColumnX - pdfStyles.spacing.cellPadding, tableY + summaryRowHeight / 2, { align: "right", baseline: "middle" });
         tableY += summaryRowHeight;
 
         // GST
@@ -455,10 +404,8 @@ export const downloadQuotationPdf = async (record) => {
         }
         pdf.setFont(pdfStyles.font.family, pdfStyles.font.normal); // Font for GST label
         pdf.rect(tableStartX, tableY, totalTableWidth, summaryRowHeight);
-        // Corrected alignment for label to be within the QTY column, right-aligned
-        pdf.text("TAXES - GST 18%", tableStartX + colWidthDesc + colWidthUnit + colWidthQty - pdfStyles.spacing.cellPadding, tableY + summaryRowHeight / 2, { align: "right", baseline: "middle" });
-        // Value remains right-aligned in Total Price column
-        pdf.text(formatCurrency(gstAmount), tableStartX + colWidthDesc + colWidthUnit + colWidthQty + colWidthTotal - pdfStyles.spacing.cellPadding, tableY + summaryRowHeight / 2, { align: "right", baseline: "middle" });
+        pdf.text("TAXES - GST 18%", labelColumnX - pdfStyles.spacing.cellPadding, tableY + summaryRowHeight / 2, { align: "right", baseline: "middle" });
+        pdf.text(formatCurrency(gstAmount), valueColumnX - pdfStyles.spacing.cellPadding, tableY + summaryRowHeight / 2, { align: "right", baseline: "middle" });
         tableY += summaryRowHeight;
 
         // Grand Total
@@ -472,11 +419,9 @@ export const downloadQuotationPdf = async (record) => {
         }
         pdf.setFont(pdfStyles.font.family, pdfStyles.font.bold); // Font for Grand Total label
         pdf.rect(tableStartX, tableY, totalTableWidth, summaryRowHeight);
-        // Corrected alignment for label to be within the QTY column, right-aligned
-        pdf.text("GRAND TOTAL", tableStartX + colWidthDesc + colWidthUnit + colWidthQty - pdfStyles.spacing.cellPadding, tableY + summaryRowHeight / 2, { align: "right", baseline: "middle" });
-        // Value remains right-aligned in Total Price column
-        pdf.text(formatCurrency(grandTotalAmount), tableStartX + colWidthDesc + colWidthUnit + colWidthQty + colWidthTotal - pdfStyles.spacing.cellPadding, tableY + summaryRowHeight / 2, { align: "right", baseline: "middle" });
-        y = tableY + summaryRowHeight + pdfStyles.spacing.sectionGap; // Move Y cursor past table
+        pdf.text("GRAND TOTAL", labelColumnX - pdfStyles.spacing.cellPadding, tableY + summaryRowHeight / 2, { align: "right", baseline: "middle" });
+        pdf.text(formatCurrency(grandTotalAmount), valueColumnX - pdfStyles.spacing.cellPadding, tableY + summaryRowHeight / 2, { align: "right", baseline: "middle" });
+        y = tableY + summaryRowHeight + pdfStyles.spacing.sectionGap;
 
         // Total in words
         pdf.setFontSize(pdfStyles.fontSize.summaryText);
@@ -493,19 +438,17 @@ export const downloadQuotationPdf = async (record) => {
         }
         pdf.text(`Amount in words:`, pdfStyles.spacing.padding, y);
         y += pdfStyles.spacing.lineHeight;
-        pdf.text(textLines, pdfStyles.spacing.padding + 10, y); // Indent the wrapped text
+        pdf.text(textLines, pdfStyles.spacing.padding + 10, y);
         y += (textLines.length * pdfStyles.spacing.lineHeight) + 5;
 
         // Notes and Customer's Scope Box
         const boxPadding = 5;
         const boxStartX = pdfStyles.spacing.padding;
         const boxWidth = pdfWidth - 2 * pdfStyles.spacing.padding;
-
         const noteTitleLines = pdf.splitTextToSize("Note:", boxWidth - 2 * boxPadding);
         const noteContentLines = pdf.splitTextToSize(quotationContent.quotationNotes, boxWidth - 2 * boxPadding);
         const customerScopeTitleLines = pdf.splitTextToSize("CUSTOMER'S SCOPE:", boxWidth - 2 * boxPadding);
         const customerScopeContentLines = quotationContent.customerScope.split('\n').filter(line => line.trim() !== '');
-
         let requiredBoxHeight = (noteTitleLines.length * pdfStyles.spacing.lineHeight) + (noteContentLines.length * pdfStyles.spacing.lineHeight) +
             (customerScopeTitleLines.length * pdfStyles.spacing.lineHeight) + (customerScopeContentLines.length * pdfStyles.spacing.lineHeight * 1.2) +
             (boxPadding * 4) + 20;
@@ -517,10 +460,8 @@ export const downloadQuotationPdf = async (record) => {
             await addHeader();
             y += pdfStyles.spacing.lineHeight * 2;
         }
-
         const boxY = y;
-        pdf.rect(boxStartX, boxY, boxWidth, requiredBoxHeight); // Draw box border
-
+        pdf.rect(boxStartX, boxY, boxWidth, requiredBoxHeight);
         let currentBoxY = boxY + boxPadding;
         pdf.setFont(pdfStyles.font.family, pdfStyles.font.bold);
         pdf.text(noteTitleLines, boxStartX + boxPadding, currentBoxY);
@@ -529,11 +470,9 @@ export const downloadQuotationPdf = async (record) => {
         pdf.setLineWidth(pdfStyles.lines.box);
         pdf.line(boxStartX + boxPadding, currentBoxY, boxStartX + boxWidth - boxPadding, currentBoxY);
         currentBoxY += boxPadding;
-
         pdf.setFont(pdfStyles.font.family, pdfStyles.font.normal);
         pdf.text(noteContentLines, boxStartX + boxPadding, currentBoxY, { maxWidth: boxWidth - 2 * boxPadding });
         currentBoxY += (noteContentLines.length * pdfStyles.spacing.lineHeight) + boxPadding * 2;
-
         pdf.setFont(pdfStyles.font.family, pdfStyles.font.bold);
         pdf.text(customerScopeTitleLines, boxStartX + boxPadding, currentBoxY);
         currentBoxY += (customerScopeTitleLines.length * pdfStyles.spacing.lineHeight);
@@ -541,7 +480,6 @@ export const downloadQuotationPdf = async (record) => {
         pdf.setLineWidth(pdfStyles.lines.box);
         pdf.line(boxStartX + boxPadding, currentBoxY, boxStartX + boxWidth - boxPadding, currentBoxY);
         currentBoxY += boxPadding;
-
         pdf.setFont(pdfStyles.font.family, pdfStyles.font.normal);
         for (const line of customerScopeContentLines) {
             const wrappedLines = pdf.splitTextToSize(`• ${line.trim()}`, boxWidth - 2 * boxPadding - 5);
@@ -550,7 +488,7 @@ export const downloadQuotationPdf = async (record) => {
                 currentBoxY += pdfStyles.spacing.lineHeight * 1.2;
             }
         }
-        y = boxY + requiredBoxHeight + pdfStyles.spacing.sectionGap; // Update overall Y position
+        y = boxY + requiredBoxHeight + pdfStyles.spacing.sectionGap;
 
         // Terms & Conditions
         pdf.setFontSize(pdfStyles.fontSize.sectionTitle);
@@ -564,13 +502,11 @@ export const downloadQuotationPdf = async (record) => {
         }
         pdf.text("ANNEXURE - II - TERMS & CONDITIONS", pdfWidth / 2, y, { align: "center" });
         y += pdfStyles.spacing.lineHeight * 2;
-
         pdf.setFontSize(pdfStyles.fontSize.summaryText);
         pdf.setFont(pdfStyles.font.family, pdfStyles.font.normal);
         const termsCol1Width = (pdfWidth - 2 * pdfStyles.spacing.padding) * 0.35;
         const termsCol2Width = (pdfWidth - 2 * pdfStyles.spacing.padding) * 0.65;
         const termRowMinHeight = 7;
-
         for (const term of quotationContent.termsData) {
             const labelLines = pdf.splitTextToSize(`${term.label}:`, termsCol1Width - 2 * pdfStyles.spacing.cellPadding);
             const valueLines = pdf.splitTextToSize(term.value || 'N/A', termsCol2Width - 2 * pdfStyles.spacing.cellPadding);
@@ -593,15 +529,12 @@ export const downloadQuotationPdf = async (record) => {
                 pdf.setFontSize(pdfStyles.fontSize.summaryText);
                 pdf.setFont(pdfStyles.font.family, pdfStyles.font.normal);
             }
-
-            pdf.setDrawColor(pdfStyles.colors.tableBorder); // Set border color for terms table
+            pdf.setDrawColor(pdfStyles.colors.tableBorder);
             pdf.setLineWidth(pdfStyles.lines.table);
             pdf.rect(pdfStyles.spacing.padding, y, termsCol1Width, actualTermRowHeight);
             pdf.rect(pdfStyles.spacing.padding + termsCol1Width, y, termsCol2Width, actualTermRowHeight);
-
             const labelTextYOffset = (actualTermRowHeight - (labelLines.length * pdfStyles.spacing.lineHeight)) / 2 + pdfStyles.spacing.cellPadding;
             const valueTextYOffset = (actualTermRowHeight - (valueLines.length * pdfStyles.spacing.lineHeight)) / 2 + pdfStyles.spacing.cellPadding;
-
             pdf.setFont(pdfStyles.font.family, pdfStyles.font.bold);
             pdf.text(labelLines, pdfStyles.spacing.padding + pdfStyles.spacing.cellPadding, y + labelTextYOffset);
             pdf.setFont(pdfStyles.font.family, pdfStyles.font.normal);
@@ -627,7 +560,6 @@ export const downloadQuotationPdf = async (record) => {
         y += pdfStyles.spacing.lineHeight;
         pdf.text("+91 9944039125", pdfStyles.spacing.padding, y);
 
-        // Update all page numbers in the footer
         const finalPageCount = pdf.internal.getNumberOfPages();
         for (let i = 1; i <= finalPageCount; i++) {
             pdf.setPage(i);
@@ -639,7 +571,5 @@ export const downloadQuotationPdf = async (record) => {
     } catch (err) {
         console.error("Failed to generate PDF:", err);
         toast.error("Failed to generate PDF. Please try again.", { id: toastId });
-    } finally {
-        // No temporary divs to clean up as we're drawing directly
     }
-};  
+};

@@ -39,7 +39,7 @@ const Login = () => {
     <div className="login-wrapper">
       <div className="login-left">
         <Card className="login-card" bordered={false}>
-          <h2 className="login-title">Log In  <UserOutlined style={{ background: "#f48d41", color: "white", padding: "20px",  borderRadius: "50%" }} />
+          <h2 className="login-title">Log In  <UserOutlined style={{ background: "#0E2B43", color: "white", padding: "20px",  borderRadius: "50%" }} />
 
 </h2>
           <p className="login-subtitle">Welcome back! Please enter your details</p>

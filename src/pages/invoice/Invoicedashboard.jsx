@@ -47,7 +47,7 @@ const { Option } = Select;
 
 // Define colors for the Pie Chart and Area Chart
 const PIE_CHART_COLORS = ["#52c41a", "#faad14"]; // Green for Paid, Orange for Pending/Partial
-const AREA_CHART_COLORS = ["#ef7a1b"]; // A vibrant blue for the area chart
+const AREA_CHART_COLORS = ["#0E2B43"]; // A vibrant blue for the area chart
 
 // Define colors for the statistic cards, mimicking the uploaded image
 const STATISTIC_CARD_COLORS = [
@@ -342,7 +342,7 @@ const InvoiceDashboard = () => {
       <div style={{ padding: "20px", textAlign: "center", color: "red", fontSize: "1.2em" }}>
         <Paragraph type="danger">{error}</Paragraph>
         <Button onClick={fetchInvoices} type="primary"
-                    style={{ backgroundColor: '#ef7a1b', borderColor: '#orange', color: 'white' }}
+                    style={{ backgroundColor: '#0E2B43', borderColor: '#orange', color: 'white' }}
 >
           Retry Loading Invoices
         </Button>

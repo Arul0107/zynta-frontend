@@ -1,0 +1,11 @@
+.countdown {
+  color: green;
+  font-weight: bold;
+  transition: all 0.5s linear;
+}
+
+.overtime {
+  color: red;
+  font-weight: bold;
+  transition: all 0.5s linear;
+}

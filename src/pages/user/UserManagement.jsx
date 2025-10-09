@@ -6,82 +6,35 @@ import {
   EditOutlined,
   DeleteOutlined,
   UserAddOutlined,
-  SwapOutlined // New icon for transfer
+  SwapOutlined
 } from '@ant-design/icons';
 import axios from '../../api/axios';
 import toast from 'react-hot-toast';
 
 const { Option } = Select;
 
-const UserManagement = () => {
-  const [users, setUsers] = useState([]);
-  const [departments, setDepartments] = useState([]); // State for departments
-  const [teams, setTeams] = useState([]); // State for teams
+const UserManagement = ({ users, departments, teams, fetchUsers, fetchDepartments, fetchTeams, loading }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [form] = Form.useForm();
 
-  // New states for transfer functionality
   const [transferDrawerOpen, setTransferDrawerOpen] = useState(false);
   const [transferringUser, setTransferringUser] = useState(null);
-  const [transferForm] = Form.useForm(); // Separate form for transfer drawer
-
+  const [transferForm] = Form.useForm();
+  
   const currentUser = JSON.parse(localStorage.getItem('user'));
   const isSuperadmin = currentUser?.role === 'Superadmin';
   const isAdmin = currentUser?.role === 'Admin';
   const isTeamLeader = currentUser?.role === 'Team Leader';
 
-  const fetchUsers = async () => {
-    try {
-      const res = await axios.get('/api/users'); // Fetch all users
-      let filteredUsers = res.data;
-
-      // If current user is a Team Leader, filter users to show only their team members + self
-      if (isTeamLeader && currentUser.team) {
-        filteredUsers = res.data.filter(user =>
-          user.team?._id === currentUser.team || user._id === currentUser._id
-        );
-      }
-      setUsers(filteredUsers);
-    } catch {
-      toast.error('Failed to load users');
-    }
-  };
-
-  const fetchDepartments = async () => {
-    try {
-      const res = await axios.get('/api/departments');
-      setDepartments(res.data);
-    } catch {
-      toast.error('Failed to load departments');
-    }
-  };
-
-  const fetchTeams = async () => {
-    try {
-      const res = await axios.get('/api/teams');
-      setTeams(res.data);
-    } catch {
-      toast.error('Failed to load teams');
-    }
-  };
-
-  useEffect(() => {
-    fetchUsers();
-    // Fetch departments and teams only if the current user is Superadmin or Admin
-    if (isSuperadmin || isAdmin) {
-      fetchDepartments();
-      fetchTeams();
-    }
-  }, [isSuperadmin, isAdmin, isTeamLeader, currentUser?.team]); // Re-fetch if roles or team changes
+  useEffect(() => {}, []);
 
   const openDrawerForCreate = () => {
     setEditingUser(null);
     form.resetFields();
-    // Pre-fill default values for new user creation
     form.setFieldsValue({
-      role: 'Employee', // Default role
-      status: 'Active', // Default status
+      role: 'Employee',
+      status: 'Active',
     });
     setDrawerOpen(true);
   };
@@ -94,7 +47,6 @@ const UserManagement = () => {
       mobile: user.mobile,
       role: user.role,
       status: user.status,
-      // Ensure department and team are set correctly, handling populated objects
       department: user.department?._id,
       team: user.team?._id,
     });
@@ -104,13 +56,8 @@ const UserManagement = () => {
   const handleDrawerSubmit = async () => {
     try {
       const values = await form.validateFields();
+      if (editingUser && !values.password) delete values.password;
 
-      // Omit password if left empty when editing
-      if (editingUser && !values.password) {
-        delete values.password;
-      }
-
-      // If a Team Leader is editing, ensure they cannot change role, department, or team
       if (isTeamLeader && editingUser) {
         if (values.role !== editingUser.role) {
           toast.error('Team Leaders cannot change user roles.');
@@ -136,7 +83,6 @@ const UserManagement = () => {
 
       setDrawerOpen(false);
       fetchUsers();
-      // Re-fetch teams and departments if current user is admin/superadmin to update lists
       if (isSuperadmin || isAdmin) {
         fetchTeams();
         fetchDepartments();
@@ -149,7 +95,6 @@ const UserManagement = () => {
 
   const handleDelete = async (id) => {
     try {
-      // Prevent Superadmin/Admin from deleting themselves
       if ((isSuperadmin || isAdmin) && currentUser._id === id) {
         toast.error('You cannot delete your own account.');
         return;
@@ -157,7 +102,6 @@ const UserManagement = () => {
       await axios.delete(`/api/users/${id}`);
       toast.success('User deleted');
       fetchUsers();
-      // Re-fetch teams and departments if current user is admin/superadmin to update lists
       if (isSuperadmin || isAdmin) {
         fetchTeams();
         fetchDepartments();
@@ -167,14 +111,13 @@ const UserManagement = () => {
     }
   };
 
-  // --- New Transfer Functionality ---
   const openTransferDrawer = (user) => {
     setTransferringUser(user);
     transferForm.setFieldsValue({
       currentDepartment: user.department?.name,
       currentTeam: user.team?.name,
-      newDepartment: user.department?._id, // Pre-select current department
-      newTeam: user.team?._id, // Pre-select current team
+      newDepartment: user.department?._id,
+      newTeam: user.team?._id,
     });
     setTransferDrawerOpen(true);
   };
@@ -184,9 +127,6 @@ const UserManagement = () => {
       const values = await transferForm.validateFields();
       const { newDepartment, newTeam } = values;
 
-      // API call to transfer user - this endpoint needs to be implemented in the backend (e.g., in userController.js)
-      // The backend logic should handle removing the user from the old team/department
-      // and adding them to the new team/department, updating their user document.
       await axios.put(`/api/users/transfer/${transferringUser._id}`, {
         newDepartmentId: newDepartment,
         newTeamId: newTeam,
@@ -194,16 +134,14 @@ const UserManagement = () => {
 
       toast.success(`${transferringUser.name} transferred successfully`);
       setTransferDrawerOpen(false);
-      fetchUsers(); // Refresh user list to reflect changes
-      fetchTeams(); // Refresh teams to ensure member lists are updated
-      fetchDepartments(); // Refresh departments if department changes affect team counts etc.
+      fetchUsers();
+      fetchTeams();
+      fetchDepartments();
     } catch (err) {
       console.error("Transfer error:", err);
       toast.error(err?.response?.data?.message || 'Failed to transfer user');
     }
   };
-  // --- End New Transfer Functionality ---
-
 
   const columns = [
     { title: 'Name', dataIndex: 'name', key: 'name' },
@@ -211,41 +149,38 @@ const UserManagement = () => {
     { title: 'Mobile', dataIndex: 'mobile', key: 'mobile' },
     { title: 'Role', dataIndex: 'role', key: 'role' },
     { title: 'Status', dataIndex: 'status', key: 'status' },
-    // {
-    //   title: 'Department',
-    //   dataIndex: 'department',
-    //   key: 'department',
-    //   render: (department) => department?.name || 'N/A' // Display department name
-    // },21
-    // {
-    //   title: 'Team',
-    //   dataIndex: 'team',
-    //   key: 'team',
-    //   render: (team) => team?.name || 'N/A' // Display team name
-    // },
+    {
+      title: 'Department',
+      dataIndex: 'department',
+      key: 'department',
+      render: (department) => department?.name || 'N/A'
+    },
+    {
+      title: 'Team',
+      dataIndex: 'team',
+      key: 'team',
+      render: (team) => team?.name || 'N/A'
+    },
     {
       title: 'Actions',
       key: 'actions',
       render: (_, record) => (
         <Space>
-          {/* Edit button: Superadmin/Admin can edit any user. Team Leader can edit their team members (excluding self if not allowed by business logic) */}
           {(isSuperadmin || isAdmin || (isTeamLeader && currentUser.team === record.team?._id)) && (
             <Button icon={<EditOutlined />} onClick={() => openDrawerForEdit(record)} />
           )}
-          {/* Transfer button: Only Superadmin/Admin can transfer users */}
           {(isSuperadmin || isAdmin) && (
-             <Button
-               icon={<SwapOutlined />}
-               onClick={() => openTransferDrawer(record)}
-               title="Transfer User to another Team/Department"
-             />
+              <Button
+                icon={<SwapOutlined />}
+                onClick={() => openTransferDrawer(record)}
+                title="Transfer User to another Team/Department"
+              />
           )}
-          {/* Delete button: Only Superadmin/Admin can delete users, and not themselves */}
           {(isSuperadmin || isAdmin) && (
             <Popconfirm
               title="Delete this user?"
               onConfirm={() => handleDelete(record._id)}
-              disabled={currentUser._id === record._id} // Prevent deleting self
+              disabled={currentUser._id === record._id}
             >
               <Button danger icon={<DeleteOutlined />} disabled={currentUser._id === record._id} />
             </Popconfirm>
@@ -259,10 +194,10 @@ const UserManagement = () => {
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <h2>User Management</h2>
-        {(isSuperadmin || isAdmin) && ( // Only Superadmin/Admin can create users
+        {(isSuperadmin || isAdmin) && (
           <Button
             type="primary"
-            style={{ backgroundColor: '#ef7a1b', borderColor: '#orange', color: 'white' }}
+            style={{ backgroundColor: '#0E2B43', borderColor: '#orange', color: 'white' }}
             icon={<UserAddOutlined />}
             onClick={openDrawerForCreate}
           >
@@ -274,22 +209,25 @@ const UserManagement = () => {
       <Table
         columns={columns}
         dataSource={users}
+        loading={loading}
         rowKey="_id"
         bordered
       />
 
+      {/* Create/Edit Drawer */}
       <Drawer
         title={editingUser ? 'Edit User' : 'Create User'}
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         width={420}
         destroyOnClose
+        styles={{ body: { paddingBottom: 80 } }}
         footer={
           <div style={{ textAlign: 'right' }}>
             <Button onClick={() => setDrawerOpen(false)} style={{ marginRight: 8 }}>Cancel</Button>
             <Button
               type="primary"
-              style={{ backgroundColor: '#ef7a1b', borderColor: '#orange', color: 'white' }}
+              style={{ backgroundColor: '#0E2B43', borderColor: '#orange', color: 'white' }}
               onClick={handleDrawerSubmit}
             >
               {editingUser ? 'Update' : 'Create'}
@@ -313,7 +251,6 @@ const UserManagement = () => {
             <Input disabled={isTeamLeader && editingUser && currentUser._id !== editingUser._id} />
           </Form.Item>
 
-          {/* Password only for creation or if Superadmin/Admin wants to reset */}
           {((!editingUser && (isSuperadmin || isAdmin)) || (editingUser && (isSuperadmin || isAdmin))) && (
             <Form.Item
               name="password"
@@ -327,11 +264,10 @@ const UserManagement = () => {
           <Form.Item name="role" label="Role" rules={[{ required: true, message: 'Please select a role' }]}>
             <Select
               placeholder="Select role"
-              // Disable role change for Team Leaders unless they are editing their own profile
               disabled={isTeamLeader && editingUser && currentUser._id !== editingUser._id}
             >
               <Option value="Superadmin" disabled={!isSuperadmin}>Superadmin</Option>
-              <Option value="Admin" disabled={!isSuperadmin}>Admin</Option> {/* Admin cannot promote to Superadmin */}
+              <Option value="Admin" disabled={!isSuperadmin}>Admin</Option>
               <Option value="Team Leader">Team Leader</Option>
               <Option value="Employee">Employee</Option>
             </Select>
@@ -357,7 +293,6 @@ const UserManagement = () => {
             </Form.Item>
           )}
 
-     
           {(isSuperadmin || isAdmin) && (
             <Form.Item name="team" label="Team">
               <Select placeholder="Select team" allowClear>
@@ -370,19 +305,20 @@ const UserManagement = () => {
         </Form>
       </Drawer>
 
-      {/* New Drawer for User Transfer */}
+      {/* Transfer Drawer */}
       <Drawer
         title={`Transfer User: ${transferringUser?.name}`}
         open={transferDrawerOpen}
         onClose={() => setTransferDrawerOpen(false)}
         width={420}
         destroyOnClose
+        styles={{ body: { paddingBottom: 80 } }}
         footer={
           <div style={{ textAlign: 'right' }}>
             <Button onClick={() => setTransferDrawerOpen(false)} style={{ marginRight: 8 }}>Cancel</Button>
             <Button
               type="primary"
-              style={{ backgroundColor: '#ef7a1b', borderColor: '#orange', color: 'white' }}
+              style={{ backgroundColor: '#0E2B43', borderColor: '#orange', color: 'white' }}
               onClick={handleTransferSubmit}
             >
               Transfer
@@ -420,3 +356,4 @@ const UserManagement = () => {
 };
 
 export default UserManagement;
+ 
