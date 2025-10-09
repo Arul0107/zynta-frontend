@@ -8,7 +8,7 @@ const Dashboard = React.lazy(() => import('../pages/dashboard/Dashboard'));
 const EodReport = React.lazy(() => import('../pages/Attendance/EodReport'));
 const TimeSheetDashboard = React.lazy(() => import('../pages/Attendance/TimeSheetDashboard'));
 const TaskManagement = React.lazy(() => import('../pages/task/TaskManagement'));
-const InvoiceDashboard = React.lazy(() => import('../pages/invoice/invoicedashboard'));
+const InvoiceDashboard = React.lazy(() => import('../pages/invoice/InvoiceDashboard'));
 const Login = React.lazy(() => import('../pages/Login'));
 const Profile = React.lazy(() => import('../pages/Profile'));
 const Settings = React.lazy(() => import('../pages/Settings'));
