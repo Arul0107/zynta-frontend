@@ -24,13 +24,11 @@ const API_URL = "/api/accounts";
 
 const Customers = () => {
     const [searchText, setSearchText] = useState('');
-    const [activeZoneTab, setActiveZoneTab] = useState('all'); // State for zone tabs
     const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
-    const [zones, setZones] = useState([]);
-    const [loadingZones, setLoadingZones] = useState(false);
+    
     const [formVisible, setFormVisible] = useState(false);
     const [currentCustomer, setCurrentCustomer] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -61,7 +59,6 @@ const Customers = () => {
                 searchText = '',
                 sortBy = 'createdAt',
                 sortOrder = 'desc',
-                zoneId = activeZoneTab,
             } = params;
 
             let apiUrl = `${API_URL}/paginated?page=${current}&pageSize=${pageSize}&search=${searchText}&status=Customer`;
@@ -79,9 +76,6 @@ const Customers = () => {
                  apiUrl += `&teamLeaderId=${currentUserId}&role=${role}`;
             }
 
-            if (zoneId && zoneId !== 'all') {
-                apiUrl += `&zone=${zoneId}`;
-            }
 
             const response = await axios.get(apiUrl);
             setCustomers(response.data.data);
@@ -113,40 +107,18 @@ const Customers = () => {
         }
     };
 
-    const fetchZones = async () => {
-        setLoadingZones(true);
-        try {
-            let zonesApiUrl = '/api/zones';
-            if (role === "Employee" && currentUserId) {
-                zonesApiUrl += `?userId=${currentUserId}`;
-            } else if (role === "Team Leader" && currentUserId) {
-                zonesApiUrl += `?teamLeaderId=${currentUserId}`;
-            }
-            const response = await axios.get(zonesApiUrl);
-            setZones(response.data);
-        } catch (error) {
-            console.error("Error fetching zones:", error);
-            toast.error("Failed to load zones.");
-        } finally {
-            setLoadingZones(false);
-        }
-    };
+  
 
-    const handleZoneTabChange = (key) => {
-        setActiveZoneTab(key);
-        setPagination({ ...pagination, current: 1 }); // Reset to the first page when the tab changes
-    };
 
     useEffect(() => {
         fetchCustomers({
             current: pagination.current,
             pageSize: pagination.pageSize,
             searchText: searchText,
-            zoneId: activeZoneTab,
+            
         });
         fetchAllUsers();
-        fetchZones();
-    }, [pagination.current, pagination.pageSize, searchText, role, currentUserId, activeZoneTab]);
+    }, [pagination.current, pagination.pageSize, searchText, role, currentUserId]);
 
     const handleEdit = (record) => {
         setCurrentCustomer(record);
@@ -167,7 +139,7 @@ const Customers = () => {
                 current: pagination.current,
                 pageSize: pagination.pageSize,
                 searchText: searchText,
-                zoneId: activeZoneTab,
+                
             });
         } catch (err) {
             toast.error(`Failed to ${currentCustomer?._id ? 'update' : 'create'} customer`);
@@ -195,7 +167,7 @@ const Customers = () => {
                 current: pagination.current,
                 pageSize: pagination.pageSize,
                 searchText: searchText,
-                zoneId: activeZoneTab,
+                
             });
         } catch (err) {
             toast.error('Failed to update status');
@@ -217,7 +189,7 @@ const Customers = () => {
                 current: pagination.current,
                 pageSize: pagination.pageSize,
                 searchText: searchText,
-                zoneId: activeZoneTab,
+                
             });
         } catch (err) {
             toast.error('Failed to close customer account');
@@ -307,7 +279,6 @@ const Customers = () => {
                 Website: customer.website,
                 "Is Customer": customer.isCustomer ? "Yes" : "No",
                 "Created At": new Date(customer.createdAt).toLocaleString(),
-                "Zone": customer.zone?.name || "N/A",
             };
             return row;
         });
@@ -358,16 +329,7 @@ const Customers = () => {
                 ),
             sorter: true,
         },
-        {
-            title: 'Zone',
-            dataIndex: ['zone', 'name'],
-            render: (text) => text || 'N/A',
-            sorter: (a, b) => {
-                const zoneA = a.zone?.name || '';
-                const zoneB = b.zone?.name || '';
-                return zoneA.localeCompare(zoneB);
-            },
-        },
+     
         {
             title: 'Latest Note',
             render: (_, record) => {
@@ -437,7 +399,7 @@ const Customers = () => {
             searchText: searchText,
             sortBy,
             sortOrder,
-            zoneId: activeZoneTab,
+
         });
     };
 
@@ -482,15 +444,7 @@ const Customers = () => {
                     </Col>
                 </Row>
 
-                <Tabs activeKey={activeZoneTab} onChange={handleZoneTabChange} style={{ marginBottom: 16 }}>
-                    <TabPane tab="All Customers" key="all" />
-                    {zones.map(zone => (
-                        <TabPane
-                            tab={<span>{zone.name}</span>}
-                            key={zone._id}
-                        />
-                    ))}
-                </Tabs>
+            
 
                 {loading ? (
                     <Spin size="large" style={{ display: 'block', margin: '50px auto' }} />
@@ -518,8 +472,7 @@ const Customers = () => {
                 initialValues={currentCustomer}
                 allUsers={users}
                 loadingUsers={loadingUsers}
-                allZones={zones}
-                loadingZones={loadingZones}
+                
             />
 
             <Modal
@@ -540,13 +493,13 @@ const Customers = () => {
                         visible={followUpDrawerVisible}
                         onClose={() => setFollowUpDrawerVisible(false)}
                         account={selectedAccount}
-                        refreshAccounts={() => fetchCustomers({ current: pagination.current, pageSize: pagination.pageSize, searchText: searchText, zoneId: activeZoneTab })}
+                        refreshAccounts={() => fetchCustomers({ current: pagination.current, pageSize: pagination.pageSize, searchText: searchText })}
                     />
                     <NotesDrawer
                         visible={notesDrawerVisible}
                         onClose={() => setNotesDrawerVisible(false)}
                         account={selectedAccount}
-                        refreshAccounts={() => fetchCustomers({ current: pagination.current, pageSize: pagination.pageSize, searchText: searchText, zoneId: activeZoneTab })}
+                        refreshAccounts={() => fetchCustomers({ current: pagination.current, pageSize: pagination.pageSize, searchText: searchText })}
                     />
                 </>
             )}

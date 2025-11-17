@@ -173,9 +173,9 @@ const BusinessAccountForm = ({
             <Col span={12}><Form.Item name="contactNumber" label="Mobile Number" rules={[{ required: true, message: 'Please enter mobile number' }]}><Input /></Form.Item></Col>
             <Col span={12}><Form.Item name="typeOfLead" label="Type of Leads">
               <Select mode="multiple" allowClear>
-                <Option value="Regular">Regular</Option>
-                <Option value="Revenue">Revenue</Option>
-                <Option value="Government">Government</Option>
+                <Option value="Fixed client">Fixed client</Option>
+                <Option value="Revenue based client">Revenue based client</Option>
+                <Option value="Vrism Product">Vrism Product</Option>
                 <Option value="Occupational">Occupational</Option>
               </Select>
             </Form.Item></Col>

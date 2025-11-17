@@ -1,22 +1,20 @@
 // src/components/Login.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { Form, Input, Button, Card } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import axios from '../api/axios'; // ✅ use configured axios
+import axios from '../api/axios';
 import toast from 'react-hot-toast';
 import '../css/Login.css';
 import loginImage from '../assets/login.png';
-import {
-  
-  UserOutlined,
-  
-} from "@ant-design/icons";
+import { UserOutlined } from "@ant-design/icons";
 
 const Login = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const onFinish = async (values) => {
     try {
+      setLoading(true); // ✅ Start loading
       const res = await axios.post('/api/auth/login', {
         username: values.email,
         password: values.password
@@ -29,9 +27,16 @@ const Login = () => {
       localStorage.setItem('token_expiry', Date.now() + 2 * 24 * 60 * 60 * 1000);
 
       toast.success(`Welcome ${user.name}!`);
-      navigate('/dashboard');
+
+      if (["Employee", "TeamLead"].includes(user.role)) {
+        navigate('/attendance');
+      } else {
+        navigate('/eodreport');
+      }
     } catch (err) {
       toast.error('Invalid credentials');
+    } finally {
+      setLoading(false); // ✅ Stop loading no matter success or fail
     }
   };
 
@@ -39,9 +44,9 @@ const Login = () => {
     <div className="login-wrapper">
       <div className="login-left">
         <Card className="login-card" bordered={false}>
-          <h2 className="login-title">Log In  <UserOutlined style={{ background: "#0E2B43", color: "white", padding: "20px",  borderRadius: "50%" }} />
-
-</h2>
+          <h2 className="login-title">
+            Log In <UserOutlined style={{ background: "#0E2B43", color: "white", padding: "20px", borderRadius: "50%" }} />
+          </h2>
           <p className="login-subtitle">Welcome back! Please enter your details</p>
           <Form layout="vertical" onFinish={onFinish}>
             <Form.Item
@@ -65,8 +70,14 @@ const Login = () => {
             </div>
 
             <Form.Item>
-              <Button type="primary" htmlType="submit" block className="login-button">
-                Log in
+              <Button 
+                type="primary" 
+                htmlType="submit" 
+                block 
+                className="login-button"
+                loading={loading}  // ✅ Show spinner here
+              >
+                {loading ? "Logging in..." : "Log in"}
               </Button>
             </Form.Item>
           </Form>

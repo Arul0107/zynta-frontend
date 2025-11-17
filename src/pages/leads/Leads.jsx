@@ -614,7 +614,7 @@ const Leads = () => {
                                     key="change-to-customer"
                                     onClick={() => handleStatusChange("Customer", record)}
                                 >
-                                    Change to Customer
+                                    Change to Client
                                 </Menu.Item>
                             )}
                             {/* NOTE: Superadmin is assumed to be an Admin role for the soft delete action */}
@@ -668,7 +668,7 @@ const Leads = () => {
     };
 
     return (
-        <Card title={<Title level={4}>Manage Leads & Customers</Title>}>
+        <Card title={<Title level={4}>Manage Leads & Clinets</Title>}>
             <div
                 style={{
                     marginBottom: 16,

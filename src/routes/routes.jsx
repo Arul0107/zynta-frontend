@@ -41,7 +41,7 @@ export const appRoutes = [
   },
   {
     path: '/eodreport',
-    element: <RoleGuard allowedRoles={['Admin', 'Superadmin', 'Employee', 'Team Leader']}><EodReport /></RoleGuard>,
+    element: <RoleGuard allowedRoles={['Admin', 'Superadmin',]}><EodReport /></RoleGuard>,
   },
   {
     path: '/taskmanage',
@@ -68,7 +68,7 @@ export const appRoutes = [
     element: <RoleGuard allowedRoles={['Admin', 'Superadmin', 'Team Leader', 'Employee']}><Leads /></RoleGuard>,
   },
   {
-    path: '/customers',
+    path: '/clients',
     element: <RoleGuard allowedRoles={['Admin', 'Superadmin', 'Team Leader', 'Employee']}><Customers /></RoleGuard>,
   },
   {

@@ -541,7 +541,7 @@ const TaskManagement = () => {
             className="task-management-container"
             title={
                 <Title level={4}>
-                    <ClockCircleOutlined /> Task Management (Kanban View)
+                    <ClockCircleOutlined /> Task Management
                 </Title>
             }
         >

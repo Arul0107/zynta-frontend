@@ -82,7 +82,7 @@
 }
 .login-right {
   flex: 1;
-  background: linear-gradient(to top right, #f0e1ff, #f57c1b);
+  background: linear-gradient(to top right, #66e091 , #0E2B43);
   display: flex;
   align-items: center;
   justify-content: center;
