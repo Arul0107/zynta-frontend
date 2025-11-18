@@ -67,7 +67,7 @@ const QuotationFollowUpDrawer = ({ visible, onClose, quotation, refreshQuotation
     setLoading(true);
 
     const payload = {
-      date: followupDate.format('YYYY-MM-DD'),
+      date: followupDate.format('DD-MM-YYYY'),
       note: comment,
       addedBy // The ID of the user adding/updating the follow-up
     };
@@ -105,11 +105,11 @@ const QuotationFollowUpDrawer = ({ visible, onClose, quotation, refreshQuotation
  
 
   // Filter and sort follow-ups by date for display in tabs
-  const today = moment().format('YYYY-MM-DD');
+  const today = moment().format('DD-MM-YYYY');
   const sorted = [...followUps].sort((a, b) => new Date(b.date) - new Date(a.date));
 
   const todayFollowUps = sorted.filter(f =>
-    moment(f.date).format('YYYY-MM-DD') === today
+    moment(f.date).format('DD-MM-YYYY') === today
   );
   const upcoming = sorted.filter(f =>
     moment(f.date).isAfter(today, 'day')

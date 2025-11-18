@@ -115,7 +115,7 @@ export default function EodReport() {
           email: user.email || "-",
           team: user.team?.name || "-",
           department: user.department?.name || "-",
-          date: session.loginTime ? dayjs(session.loginTime).format("YYYY-MM-DD") : "-",
+          date: session.loginTime ? dayjs(session.loginTime).format("DD-MM-YYYY") : "-",
           loginTimeFormatted: session.loginTime ? dayjs(session.loginTime).format("hh:mm A") : "-",
           logoutTimeFormatted: session.logoutTime ? dayjs(session.logoutTime).format("hh:mm A") : "-",
           workedHours: session.totalHours
@@ -144,7 +144,7 @@ export default function EodReport() {
       // 6️⃣ Chart grouped by date
       const chartGrouped = {};
       rangeSessions.forEach((s) => {
-        const date = dayjs(s.loginTime).format("YYYY-MM-DD");
+        const date = dayjs(s.loginTime).format("DD-MM-YYYY");
         if (!chartGrouped[date]) chartGrouped[date] = { date, completed: 0, pending: 0 };
         if (s.eod && s.logoutTime) chartGrouped[date].completed++;
         else chartGrouped[date].pending++;

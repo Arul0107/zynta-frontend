@@ -313,7 +313,7 @@ const InvoiceDashboard = () => {
   // Prepare data for the Area Chart (Total Amount by Date)
   const aggregatedChartData = actualInvoices.reduce((acc, invoice) => {
     const date = invoice.createdAt
-      ? moment(invoice.createdAt).format('YYYY-MM-DD')
+      ? moment(invoice.createdAt).format('DD-MM-YYYY')
       : "Unknown Date";
     if (!acc[date]) {
       acc[date] = { totalAmount: 0 };

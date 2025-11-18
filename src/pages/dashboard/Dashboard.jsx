@@ -716,7 +716,7 @@ const Dashboard = () => {
       }
 
       await axios.put(apiUrl, {
-        date: followupDate ? followupDate.format("YYYY-MM-DD") : null,
+        date: followupDate ? followupDate.format("DD-MM-YYYY") : null,
         note: note,
         status: status, // Include status in the update payload
       });
@@ -1248,7 +1248,7 @@ const Dashboard = () => {
               { required: true, message: "Please select a follow-up date!" },
             ]}
           >
-            <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD" />
+            <DatePicker style={{ width: "100%" }} format="DD-MM-YYYY" />
           </Form.Item>
           <Form.Item
             name="status"

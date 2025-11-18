@@ -5,6 +5,8 @@ import {
   FileTextOutlined,
   UserOutlined,
   FileAddOutlined,
+  PlusOutlined,
+  ClockCircleOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./MobileTabMenu.css";
@@ -22,6 +24,12 @@ const MobileNavbar = () => {
       key: "/dashboard",
       icon: <DashboardOutlined />,
       label: "Dashboard",
+      roles: ["Admin", "Superadmin", "Employee"],
+    },
+    {
+      key: "/attendance",
+      icon: <ClockCircleOutlined />,
+      label: "Timesheet",
       roles: ["Admin", "Superadmin", "Employee"],
     },
     {
@@ -47,6 +55,12 @@ const MobileNavbar = () => {
       icon: <FileAddOutlined />,
       label: "Products",
       roles: ["Admin", "Superadmin"],
+    },
+    {
+      key: "/taskmanage",
+      icon: <PlusOutlined />,
+      label: "Task",
+      roles: ["Admin", "Superadmin","Employee"],
     },
   ];
 

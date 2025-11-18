@@ -173,8 +173,8 @@ ${business.email || ""}
 
     const quotation = {
       ...values,
-      date: values.date?.format("YYYY-MM-DD"),
-      validUntil: values.validUntil?.format("YYYY-MM-DD"),
+      date: values.date?.format("DD-MM-YYYY"),
+      validUntil: values.validUntil?.format("DD-MM-YYYY"),
       items,
       notes: newNote ? [...notes, newNote] : notes,
       subTotal: calculateSubTotal(),

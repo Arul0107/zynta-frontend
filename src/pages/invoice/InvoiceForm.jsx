@@ -519,15 +519,15 @@ ${business.gstNumber || ""}
       amount: values.newPaymentAmount,
       method: values.newPaymentMethod,
       reference: values.newPaymentReference,
-      date: values.newPaymentDate?.format("YYYY-MM-DD"),
+      date: values.newPaymentDate?.format("DD-MM-YYYY"),
       addedBy: getCurrentUser(),
     };
 
     // Construct the invoice data object to be saved
     const invoiceData = {
       ...values,
-      date: values.date?.format("YYYY-MM-DD"),
-      dueDate: dueDate?.format("YYYY-MM-DD"),
+      date: values.date?.format("DD-MM-YYYY"),
+      dueDate: dueDate?.format("DD-MM-YYYY"),
       paymentStatus,
       items,
       subTotal,
@@ -578,8 +578,8 @@ ${business.gstNumber || ""}
     // Prepare invoice data for printing
     const invoiceDataForPrint = {
       ...values,
-      date: values.date?.format("YYYY-MM-DD"),
-      dueDate: dueDate?.format("YYYY-MM-DD"),
+      date: values.date?.format("DD-MM-YYYY"),
+      dueDate: dueDate?.format("DD-MM-YYYY"),
       paymentStatus,
       items,
       subTotal,

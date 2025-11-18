@@ -1,34 +1,98 @@
 .top-navbar-container {
-  display: flex;
-    justify-content: flex-end;  align-items: center;
-  height: 64px;
-  padding: 0 16px;
-  background: #fff;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    padding: 0 20px;
+    height: 64px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
 }
 
-/* Hide logo by default */
-.mobile-logo-wrapper {
-  display: none;
-}
-
-/* Show logo only on mobile screens */
-@media (max-width: 768px) {
-  .mobile-logo-wrapper {
+.navbar-left-content {
     display: flex;
     align-items: center;
-  }
-.top-navbar-container {
-  /* dsd */
-  display: flex;
-    justify-content: space-between; 
- 
 }
 
-  .moblelogo {
-    display: block;
-    width: 150px;
-  }
+/* 💡 KEY CHANGE: Use Flexbox to display items in a row and center them vertically */
+.top-navbar-right {
+    display: flex;
+    align-items: center;
+}
+
+/* Base styles for all clickable icons and their spacing */
+.top-navbar-right .action-icon {
+    font-size: 20px; 
+    cursor: pointer; 
+    color: #333;
+    transition: color 0.3s;
+    /* 💡 Spacing between icons (replaces Antd Space) */
+    margin-right: 20px; 
+}
+
+/* Remove margin from the very last item (the Avatar dropdown container) */
+.top-navbar-right .ant-dropdown-trigger {
+    margin-right: 0 !important;
+}
+
+/* General style for items that don't take the full width of the Space component (like Badge wrappers) */
+.top-navbar-right > * {
+    margin-right: 20px; /* Apply consistent margin between all direct children */
+}
+/* Ensure the last direct child (the Avatar dropdown) doesn't have an outer margin */
+.top-navbar-right > *:last-child {
+    margin-right: 0;
+}
+
+/* Style for the Badge component wrapper, which contains BellOutlined */
+.top-navbar-right .ant-badge {
+    display: flex; /* Ensures the badge wrapper aligns with icons */
+    align-items: center;
+    height: 20px; /* Align vertical center */
+}
+
+
+/* Hover effect for all action icons */
+.top-navbar-right .action-icon:hover {
+    color: #1677ff;
+}
+
+/* --- Mobile/Desktop Toggle Logic (UNCHANGED) --- */
+
+.mobile-logo-wrapper {
+    display: none;
+    cursor: pointer;
+}
+
+.desktop-menu-toggle {
+    display: block; 
+}
+
+.mobile-logo {
+    height: 32px;
+    width: auto;
+}
+
+@media (max-width: 768px) {
+    
+    .desktop-menu-toggle {
+        display: none;
+    }
+
+    .mobile-logo-wrapper {
+        display: flex;
+        align-items: center;
+    }
+
+    .top-navbar-container {
+        padding: 0 16px;
+    }
+    
+    /* 💡 Key Mobile Spacing Change */
+    .top-navbar-right > * {
+        margin-right: 12px; /* Reduce spacing on mobile */
+    }
+    
+    .top-navbar-right > *:last-child {
+        margin-right: 0;
+    }
 }

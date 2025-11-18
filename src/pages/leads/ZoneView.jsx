@@ -107,7 +107,7 @@ const ZoneView = () => {
             title: "Created At",
             dataIndex: "createdAt",
             key: "createdAt",
-            render: (text) => moment(text).format("YYYY-MM-DD HH:mm"),
+            render: (text) => moment(text).format("DD-MM-YYYY HH:mm"),
             sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
         },
     ];

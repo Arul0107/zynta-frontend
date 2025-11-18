@@ -2,6 +2,7 @@
 
 import React from 'react';
 import RoleGuard from '../components/auth/RoleGuard';
+import NotificationPage from '../pages/NotificationPage';
 /*  */
 // Lazy-loaded pages
 const Dashboard = React.lazy(() => import('../pages/dashboard/Dashboard'));
@@ -66,6 +67,10 @@ export const appRoutes = [
   {
     path: '/leads',
     element: <RoleGuard allowedRoles={['Admin', 'Superadmin', 'Team Leader', 'Employee']}><Leads /></RoleGuard>,
+  },
+  {
+    path: '/notifications',
+    element: <RoleGuard allowedRoles={['Admin', 'Superadmin', 'Team Leader', 'Employee']}><NotificationPage /></RoleGuard>,
   },
   {
     path: '/clients',

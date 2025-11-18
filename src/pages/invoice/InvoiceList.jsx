@@ -466,7 +466,7 @@ const InvoiceList = ({
         title="Invoice Management"
         extra={
           <Space wrap>
-            <RangePicker onChange={setDateRange} format="YYYY-MM-DD" />
+            <RangePicker onChange={setDateRange} format="DD-MM-YYYY" />
             {/* Replaced Select with Radio.Group for status filter */}
 
             <Select

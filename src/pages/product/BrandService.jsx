@@ -107,7 +107,7 @@ const BrandService = () => {
   return (
     <Layout style={{ minHeight: "100vh", background: "#fff" }}>
       <Header style={{ background: "white", padding: 0, marginBottom: 20 }}>
-        <h2 style={{ margin: 0, padding: 20 }}>Brand Service Management</h2>
+        <h2 >Brand Service Management</h2>
       </Header>
       <Content style={{ padding: 20 }}>
         <Tabs defaultActiveKey="1">

@@ -100,7 +100,7 @@
       try {
         const newPayment = {
           ...values,
-          date: values.date.format('YYYY-MM-DD'),
+          date: values.date.format('DD-MM-YYYY'),
           addedBy: getCurrentUser(),
         };
         await axios.post(`/api/invoices/${invoice._id}/payments`, newPayment);
@@ -133,7 +133,7 @@
       try {
         const updatedPayment = {
           ...values,
-          date: values.date.format('YYYY-MM-DD'),
+          date: values.date.format('DD-MM-YYYY'),
         };
         await axios.put(`/api/invoices/${invoice._id}/payments/${currentEditingPaymentId}`, updatedPayment);
         toast.success('Payment updated successfully!');
