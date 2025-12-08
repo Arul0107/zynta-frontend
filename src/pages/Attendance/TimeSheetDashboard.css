@@ -1,93 +1,25 @@
+/* Ensure stat cards stack nicely on mobile */
+.stat-card .ant-card-head {
+    min-height: 48px;
+}
+
+.stat-card .ant-card-body h3 {
+    font-size: 1.5em !important; 
+}
+
+/* Styles specifically for the mobile Card view */
+.timesheet-mobile-card {
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+/* Timer styles (for both table and card view) */
 .countdown {
-  color: green;
-  font-weight: bold;
-  transition: all 0.5s linear;
+    color: #52c41a; /* Green for running timer */
+    font-weight: bold;
 }
 
 .overtime {
-  color: red;
-  font-weight: bold;
-  transition: all 0.5s linear;
-}
-/* Base styles - always apply */
-.countdown {
-  color: #52c41a; /* Ant Design Success Green */
-  font-weight: bold;
-}
-
-.overtime {
-  color: #ff4d4f; /* Ant Design Error Red */
-  font-weight: bold;
-}
-
-/* --- General Adjustments for Small Screens --- */
-
-/* Wrapper class for the entire dashboard content */
-.timesheet-dashboard-container {
-  padding: 24px;
-}
-
-/* Reduce padding/margin and font size on mobile */
-@media (max-width: 768px) {
-  .timesheet-dashboard-container {
-    padding: 10px; /* Reduced padding for mobile screens */
-  }
-
-  .ant-typography.ant-typography-h2 {
-    font-size: 20px !important;
-    margin-bottom: 8px !important;
-  }
-}
-
-/* --- Actions and Controls Responsiveness (Header Row) --- */
-
-/* Adjust the Row of controls (Title, RangePicker, Buttons) */
-@media (max-width: 576px) {
-  /* Stack the header elements vertically */
-  .ant-row-space-between {
-    flex-direction: column;
-    align-items: flex-start !important;
-  }
-
-  /* Give the action buttons and date picker full width on very small screens */
-  .ant-space {
-    width: 100%;
-    margin-top: 8px;
-    flex-wrap: wrap; /* Allow buttons/pickers to wrap */
-  }
-
-  /* Apply full width to RangePicker and Buttons within the Space component */
-  .ant-space > .ant-space-item {
-    width: 100%;
-  }
-
-  .ant-picker-range,
-  .ant-btn {
-    width: 100% !important;
-    margin-bottom: 8px; /* Add space between stacked elements */
-  }
-}
-
-/* --- Table Responsiveness (Handled by Antd `scroll` and CSS) --- */
-
-@media (max-width: 768px) {
-  /* Ensure the table container handles horizontal scroll provided by ant-table's `scroll.x` prop */
-  .ant-table-wrapper {
-    overflow-x: auto; 
-  }
-
-  /* Adjust spacing in table cells for tighter mobile view */
-  .ant-table-cell {
-    padding: 8px 10px !important;
-  }
-}
-
-/* --- Modal Responsiveness --- */
-
-/* Ensure modals don't take up the full screen width but look good */
-@media (max-width: 576px) {
-  .ant-modal-wrap .ant-modal {
-    max-width: 95%; /* Make modal slightly smaller than viewport */
-    margin: 10px auto;
-  }
+    color: #f5222d; /* Red for overtime (negative timer) */
+    font-weight: bold;
 }

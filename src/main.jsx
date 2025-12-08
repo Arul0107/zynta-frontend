@@ -1,14 +1,24 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import App from './App';
-import 'antd/dist/reset.css';
-import './index.css';
+// src/main.jsx OR src/index.jsx
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+
+import App from "./App";
+import "antd/dist/reset.css";
+import "./index.css";
+
+import { PresenceProvider } from "./context/PresenceContext";
+import { SocketProvider } from "./context/SocketContext";
+
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <SocketProvider>       {/* 🔥 SOCKET CONTEXT ADDED */}
+      <PresenceProvider>   {/* 🔥 PRESENCE CONTEXT */}
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </PresenceProvider>
+    </SocketProvider>
   </React.StrictMode>
 );

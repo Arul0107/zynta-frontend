@@ -17,6 +17,9 @@ import {
   Input,
   Select,
   Drawer,
+  Popconfirm,
+  Image,
+  Upload, // New: Imported Upload component
 } from "antd";
 import {
   LogoutOutlined,
@@ -30,11 +33,17 @@ import {
   EditOutlined,
   ReloadOutlined,
   SaveOutlined,
+  DeleteOutlined,
+  UploadOutlined, // New: Imported UploadOutlined
 } from "@ant-design/icons";
-import axios from "../api/axios"; // Ensure this path is correct for your project
-import toast from "react-hot-toast"; // Assuming you have react-hot-toast installed
+import axios from "../api/axios"; // Assuming this is your configured Axios instance
+import toast from "react-hot-toast"; // Assuming you use react-hot-toast
+
+// Utility function for file upload
+import { uploadFile } from "../utils/fileStorage";
 
 const { Title, Text } = Typography;
+const { Dragger } = Upload; // For drag and drop image upload
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -45,64 +54,58 @@ const Profile = () => {
   const [updating, setUpdating] = useState(false);
   const [form] = Form.useForm();
 
-  // Get user ID from localStorage to fetch fresh data
+  // State for profile image management (now integrated into drawer flow)
+  const [isImageRemoving, setIsImageRemoving] = useState(false);
+  const [profileImageURL, setProfileImageURL] = useState(null); // Local state for immediate preview
+
   const getCurrentUserId = () => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
-        return parsedUser._id; // Assuming the user object in localStorage has an _id field
+        return parsedUser._id;
       } catch (error) {
         console.error("Error parsing user data from localStorage:", error);
-        localStorage.removeItem("user"); // Clear corrupted data
+        localStorage.removeItem("user");
         return null;
       }
     }
     return null;
   };
 
-  // Fetch user details from API
   const fetchUserDetails = async () => {
     const userId = getCurrentUserId();
 
     if (!userId) {
-      // If no userId is found, navigate to login immediately
       setLoading(false);
       navigate("/login");
       return;
     }
 
     setLoading(true);
-    setError(null); // Clear previous errors
+    setError(null);
 
     try {
       const response = await axios.get(`/api/users/${userId}`);
       setUser(response.data);
-
-      // Update localStorage with fresh data
+      setProfileImageURL(response.data.profileImage);
       localStorage.setItem("user", JSON.stringify(response.data));
     } catch (error) {
       console.error("Error fetching user details:", error);
-      setError(
-        "Failed to load user profile. Please check your network or try again."
-      );
+      setError("Failed to load user profile.");
 
-      // If API call fails, try to use localStorage data as fallback
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
         try {
           const parsedUser = JSON.parse(storedUser);
           setUser(parsedUser);
-          toast.error(
-            "Using cached profile data. Please refresh to get latest information."
-          );
-        } catch (parseError) {
-          console.error("Error parsing fallback user data:", parseError);
-          localStorage.removeItem("user"); // Clear corrupted data
+          setProfileImageURL(parsedUser.profileImage);
+          toast.error("Failed to fetch latest data. Using cached profile.");
+        } catch (e) {
+          localStorage.removeItem("user");
           navigate("/login");
         }
       } else {
-        // No user ID and no cached data, redirect to login
         navigate("/login");
       }
     } finally {
@@ -112,7 +115,7 @@ const Profile = () => {
 
   useEffect(() => {
     fetchUserDetails();
-  }, [navigate]); // navigate is a stable reference, so no re-renders on every render
+  }, [navigate]);
 
   const handleLogout = () => {
     Modal.confirm({
@@ -122,23 +125,21 @@ const Profile = () => {
       cancelText: "Cancel",
       okType: "danger",
       onOk: () => {
-        localStorage.removeItem("user"); // Clear user session from localStorage
+        localStorage.removeItem("user");
         navigate("/login");
       },
     });
   };
 
-  const getStatusColor = (status) => {
-    return status?.toLowerCase() === "active" ? "success" : "error";
-  };
+  const getStatusColor = (status) =>
+    status?.toLowerCase() === "active" ? "success" : "error";
 
-  const getStatusIcon = (status) => {
-    return status?.toLowerCase() === "active" ? (
+  const getStatusIcon = (status) =>
+    status?.toLowerCase() === "active" ? (
       <CheckCircleOutlined />
     ) : (
       <CloseCircleOutlined />
     );
-  };
 
   const getRoleColor = (role) => {
     const colors = {
@@ -157,163 +158,167 @@ const Profile = () => {
   };
 
   const openEditDrawer = () => {
-    // Ensure user data is available before setting form fields
     if (user) {
+      // Set form fields for basic profile data
       form.setFieldsValue({
         name: user.name,
         email: user.email,
-        mobile: user.mobile || "", // Handle cases where mobile might be null or undefined
+        mobile: user.mobile || "",
         role: user.role,
         status: user.status,
       });
+      // Set local state for image preview
+      setProfileImageURL(user.profileImage);
       setEditDrawerOpen(true);
     } else {
       toast.error("User data not loaded yet. Please try refreshing.");
     }
   };
 
-  const handleUpdateProfile = async () => {
+  const updateProfileData = async (data) => {
     try {
       setUpdating(true);
-      const values = await form.validateFields(); // Validate form fields
+      const response = await axios.put(`/api/users/${user._id}`, data);
 
-      // Remove password field if empty or not provided
-      if (!values.password) {
-        delete values.password;
-      }
-
-      const response = await axios.put(`/api/users/${user._id}`, values);
-
-      // Update user state with new data from the response
+      // Update local storage and state
       setUser(response.data);
-
-      // Update localStorage with fresh data
+      setProfileImageURL(response.data.profileImage);
       localStorage.setItem("user", JSON.stringify(response.data));
-
-      toast.success("Profile updated successfully!");
-      setEditDrawerOpen(false); // Close the drawer on success
+      
+      return response.data;
     } catch (error) {
       console.error("Error updating profile:", error);
-      // Display a more user-friendly error message
-      toast.error(
-        error?.response?.data?.message ||
-          "Failed to update profile. Please try again."
-      );
+      toast.error("Failed to update profile.");
+      throw error;
     } finally {
-      setUpdating(false); // End updating state regardless of success or failure
+      setUpdating(false);
     }
   };
 
+  const handleUpdateProfile = async () => {
+    try {
+      const values = await form.validateFields();
+      if (!values.password) delete values.password;
+      
+      // The image is already updated via handleImageUpload/handleRemoveImage
+      // but we need to ensure the final profileImageURL (which might be null) 
+      // is included in the update if it changed via the separate image functions.
+      // NOTE: For simplicity, the profileImage update is now handled within the image functions,
+      // but we'll include it here just in case, ensuring the latest state is captured.
+      
+      const updatePayload = {
+        ...values,
+        profileImage: profileImageURL, // Use the local state URL
+      };
+
+      await updateProfileData(updatePayload);
+
+      toast.success("Profile updated successfully!");
+      setEditDrawerOpen(false);
+    } catch (error) {
+      // Error already handled by updateProfileData or form validation
+    }
+  };
+
+  // Custom Upload logic for image field
+  const handleImageUpload = async ({ file, onSuccess, onError }) => {
+    toast.loading("Uploading image...", { id: "avatar-upload" });
+    try {
+      const res = await uploadFile(file);
+      if (!res?.url) {
+        toast.error("Upload failed!", { id: "avatar-upload" });
+        onError("Upload failed");
+        return;
+      }
+      
+      // Immediately update the database with the new profile image URL
+      const updatedUser = await updateProfileData({ profileImage: res.url });
+      
+      // Update local state for immediate drawer preview
+      setProfileImageURL(updatedUser.profileImage);
+
+      toast.success("Profile photo updated!", { id: "avatar-upload" });
+      onSuccess(res.url, file);
+
+    } catch (err) {
+      console.error("Upload error:", err);
+      toast.error("Upload failed!", { id: "avatar-upload" });
+      onError(err);
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    setIsImageRemoving(true);
+    toast.loading("Removing image...", { id: "remove-avatar" });
+    try {
+      await updateProfileData({ profileImage: null });
+      setProfileImageURL(null); // Clear local state
+      toast.success("Profile photo removed!", { id: "remove-avatar" });
+    } catch (err) {
+      // Error handled by updateProfileData
+    } finally {
+      setIsImageRemoving(false);
+    }
+  };
+
+  // --- RENDERING LOGIC ---
+
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "60vh",
-          flexDirection: "column",
-          gap: "16px",
-        }}
-      >
+      <div style={{ display: "flex", justifyContent: "center", minHeight: "60vh", alignItems: "center" }}>
         <Spin size="large" />
-        <Typography.Text type="secondary">
-          Loading your profile...
-        </Typography.Text>
-      </div>
-    );
-  }
-
-  if (error && !user) {
-    // Show error card only if there's an error and no user data could be loaded (even from cache)
-    return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "60vh",
-          padding: "20px",
-        }}
-      >
-        <Card style={{ maxWidth: "400px", textAlign: "center" }}>
-          <Alert
-            message="Profile Load Error"
-            description={error}
-            type="error"
-            showIcon
-            style={{ marginBottom: "16px" }}
-          />
-          <Space>
-            <Button
-              type="primary"
-                          style={{ backgroundColor: '#0E2B43', borderColor: '#orange', color: 'white' }}
-
-              onClick={handleRefresh}
-              icon={<ReloadOutlined />}
-            >
-              Retry
-            </Button>
-            <Button onClick={() => navigate("/login")}>Back to Login</Button>
-          </Space>
-        </Card>
+        {error && <Alert message={error} type="error" showIcon />}
       </div>
     );
   }
 
   if (!user) {
-    // Fallback if somehow user is null after loading and error checks
     return (
-      <div
-        style={{
-          textAlign: "center",
-          marginTop: "50px",
-          color: "#999",
-        }}
-      >
-        <UserOutlined style={{ fontSize: "48px", marginBottom: "16px" }} />
-        <div>Unable to load profile data. Please log in again.</div>
-        <Button
-          type="primary"
-                      style={{ marginTop: "16px",backgroundColor: '#0E2B43', borderColor: '#orange', color: 'white' }}
-
-          onClick={() => navigate("/login")}
-        >
-          Back to Login
-        </Button>
+      <div style={{ padding: "40px", textAlign: "center" }}>
+        <Alert message="No User Data" description="Could not load user profile." type="error" showIcon />
+        <Button onClick={() => navigate("/login")} style={{ marginTop: "20px" }}>Go to Login</Button>
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        padding: "40px 20px",
-      }}
-    >
+    <div style={{ minHeight: "100vh", padding: "40px 20px" }}>
       <div style={{ maxWidth: "800px", margin: "0 auto" }}>
-        {/* Header Card */}
-        <Card
-          style={{
-            marginBottom: "24px",
-            borderRadius: "16px",
-            border: "none",
-          }}
-        >
+        
+        {/* Header Card with Avatar and Actions */}
+        <Card style={{ marginBottom: "24px", borderRadius: "16px", border: "none", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
           <Row align="middle" gutter={24}>
             <Col>
-  <Avatar
-    size={80}
-    style={{
-      backgroundColor: "#0E2B43",
-      fontSize: "32px",
-    }}
-  >
-    {user.name ? user.name.charAt(0).toUpperCase() : <UserOutlined />}
-  </Avatar>
-</Col>
-            <Col flex={1}>
+              {/* Profile Image Display (for viewing only) */}
+              <div style={{ position: 'relative', width: 80, height: 80 }}>
+                {user.profileImage ? (
+                  <Image.PreviewGroup items={[user.profileImage]}>
+                    <Image
+                      alt={`${user.name}'s profile`}
+                      width={80}
+                      height={80}
+                      src={user.profileImage}
+                      style={{ 
+                        borderRadius: '50%', 
+                        objectFit: 'cover', 
+                        border: '2px solid #0E2B43' 
+                      }}
+                      title="Click image to zoom"
+                    />
+                  </Image.PreviewGroup>
+                ) : (
+                  <Avatar
+                    size={80}
+                    icon={<UserOutlined />}
+                    style={{ backgroundColor: "#0E2B43", fontSize: "32px" }}
+                  >
+                    {user.name ? user.name.charAt(0).toUpperCase() : null}
+                  </Avatar>
+                )}
+              </div>
+            </Col>
+
+            <Col flex="auto">
               <Title level={2} style={{ margin: 0, color: "#0E2B43" }}>
                 {user.name}
               </Title>
@@ -321,15 +326,16 @@ const Profile = () => {
                 Welcome back to your profile
               </Text>
             </Col>
+
             <Col>
-              <Space>
+              <Space wrap>
                 <Button
                   type="default"
                   icon={<ReloadOutlined />}
                   size="large"
                   onClick={handleRefresh}
                   style={{ borderRadius: "8px" }}
-                  title="Refresh Profile"
+                  title="Refresh Profile Data"
                 />
                 <Button
                   type="default"
@@ -340,13 +346,22 @@ const Profile = () => {
                 >
                   Edit Profile
                 </Button>
-               
+                <Button
+                  type="primary"
+                  danger
+                  icon={<LogoutOutlined />}
+                  size="large"
+                  onClick={handleLogout}
+                  style={{ borderRadius: "8px" }}
+                >
+                  Logout
+                </Button>
               </Space>
             </Col>
           </Row>
         </Card>
 
-        {/* Profile Details Card */}
+        {/* Profile Details Card 📌 */}
         <Card
           title={
             <Space>
@@ -357,69 +372,51 @@ const Profile = () => {
           style={{
             borderRadius: "16px",
             border: "none",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.05)"
           }}
           headStyle={{
             borderBottom: "2px solid #f0f0f0",
             fontSize: "18px",
             fontWeight: "600",
+            color: "#0E2B43"
           }}
         >
+
           <Row gutter={[24, 24]}>
+            {/* Full Name */}
             <Col xs={24} sm={12}>
-              <div style={{ marginBottom: "20px" }}>
-                <Text strong style={{ color: "#666", fontSize: "14px" }}>
+              <div style={{ marginBottom: "10px" }}>
+                <Text strong style={{ color: "#666", fontSize: "14px", display: "block", marginBottom: "4px" }}>
                   FULL NAME
                 </Text>
-                <div
-                  style={{
-                    marginTop: "4px",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <UserOutlined
-                    style={{ marginRight: "8px", color: "#0E2B43" }}
-                  />
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <UserOutlined style={{ marginRight: "8px", color: "#0E2B43" }} />
                   <Text style={{ fontSize: "16px" }}>{user.name}</Text>
                 </div>
               </div>
             </Col>
 
+            {/* Email Address */}
             <Col xs={24} sm={12}>
-              <div style={{ marginBottom: "20px" }}>
-                <Text strong style={{ color: "#666", fontSize: "14px" }}>
+              <div style={{ marginBottom: "10px" }}>
+                <Text strong style={{ color: "#666", fontSize: "14px", display: "block", marginBottom: "4px" }}>
                   EMAIL ADDRESS
                 </Text>
-                <div
-                  style={{
-                    marginTop: "4px",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <MailOutlined
-                    style={{ marginRight: "8px", color: "#52c41a" }}
-                  />
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <MailOutlined style={{ marginRight: "8px", color: "#52c41a" }} />
                   <Text style={{ fontSize: "16px" }}>{user.email}</Text>
                 </div>
               </div>
             </Col>
 
+            {/* Mobile Number */}
             <Col xs={24} sm={12}>
-              <div style={{ marginBottom: "20px" }}>
-                <Text strong style={{ color: "#666", fontSize: "14px" }}>
+              <div style={{ marginBottom: "10px" }}>
+                <Text strong style={{ color: "#666", fontSize: "14px", display: "block", marginBottom: "4px" }}>
                   MOBILE NUMBER
                 </Text>
-                <div
-                  style={{
-                    marginTop: "4px",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <PhoneOutlined
-                    style={{ marginRight: "8px", color: "#52c41a" }}
-                  />
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <PhoneOutlined style={{ marginRight: "8px", color: user.mobile ? "#52c41a" : "#999" }} />
                   <Text style={{ fontSize: "16px" }}>
                     {user.mobile || "Not provided"}
                   </Text>
@@ -436,9 +433,10 @@ const Profile = () => {
               </div>
             </Col>
 
+            {/* Role */}
             <Col xs={24} sm={12}>
-              <div style={{ marginBottom: "20px" }}>
-                <Text strong style={{ color: "#666", fontSize: "14px" }}>
+              <div style={{ marginBottom: "10px" }}>
+                <Text strong style={{ color: "#666", fontSize: "14px", display: "block", marginBottom: "4px" }}>
                   ROLE
                 </Text>
                 <div style={{ marginTop: "4px" }}>
@@ -458,9 +456,10 @@ const Profile = () => {
               </div>
             </Col>
 
+            {/* Status */}
             <Col xs={24} sm={12}>
-              <div style={{ marginBottom: "20px" }}>
-                <Text strong style={{ color: "#666", fontSize: "14px" }}>
+              <div style={{ marginBottom: "10px" }}>
+                <Text strong style={{ color: "#666", fontSize: "14px", display: "block", marginBottom: "4px" }}>
                   STATUS
                 </Text>
                 <div style={{ marginTop: "4px" }}>
@@ -493,7 +492,8 @@ const Profile = () => {
               </Text>
               {error && (
                 <Alert
-                  message="Some data may be outdated"
+                  message="Connection Issue"
+                  description="Some data may be outdated because the latest information could not be loaded from the server."
                   type="warning"
                   size="small"
                   showIcon
@@ -504,7 +504,7 @@ const Profile = () => {
           </div>
         </Card>
 
-        {/* Edit Profile Drawer */}
+        {/* Edit Profile Drawer ✏️ (Image editing is now inside) */}
         <Drawer
           title={
             <Space>
@@ -521,8 +521,7 @@ const Profile = () => {
               <Button onClick={() => setEditDrawerOpen(false)}>Cancel</Button>
               <Button
                 type="primary"
-                            style={{ backgroundColor: '#0E2B43', borderColor: '#orange', color: 'white' }}
-
+                style={{ backgroundColor: '#0E2B43', borderColor: '#0E2B43', color: 'white' }}
                 icon={<SaveOutlined />}
                 loading={updating}
                 onClick={handleUpdateProfile}
@@ -532,7 +531,67 @@ const Profile = () => {
             </Space>
           }
         >
+
           <Form form={form} layout="vertical" requiredMark="optional">
+            {/* --------------------- PROFILE IMAGE FIELD --------------------- */}
+            <Form.Item label="Profile Picture">
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                {profileImageURL ? (
+                  <div style={{ position: 'relative' }}>
+                    <Image
+                      src={profileImageURL}
+                      alt="Profile"
+                      width={100}
+                      height={100}
+                      style={{ borderRadius: '50%', objectFit: 'cover' }}
+                    />
+                    <Popconfirm
+                      title="Are you sure to remove your profile picture?"
+                      onConfirm={handleRemoveImage}
+                      okText="Yes"
+                      cancelText="No"
+                      placement="right"
+                    >
+                      <Button
+                        type="primary"
+                        danger
+                        shape="circle"
+                        icon={<DeleteOutlined />}
+                        size="small"
+                        loading={isImageRemoving}
+                        style={{
+                          position: "absolute",
+                          bottom: 0,
+                          right: 0,
+                          zIndex: 1,
+                        }}
+                      />
+                    </Popconfirm>
+                  </div>
+                ) : (
+                  <Avatar size={100} icon={<UserOutlined />} style={{ backgroundColor: "#0E2B43", fontSize: "40px" }} />
+                )}
+                
+                <Upload 
+                  customRequest={handleImageUpload} 
+                  showUploadList={false} 
+                  accept="image/*"
+                  style={{ marginLeft: '20px' }}
+                >
+                  <Button 
+                    icon={<UploadOutlined />} 
+                    style={{ marginLeft: '20px' }}
+                    size="large"
+                  >
+                    {profileImageURL ? "Change Photo" : "Upload Photo"}
+                  </Button>
+                </Upload>
+              </div>
+            </Form.Item>
+            {/* ------------------- END PROFILE IMAGE FIELD ------------------- */}
+
+            <Divider orientation="left" style={{ margin: '0 0 24px 0' }}>Basic Info</Divider>
+
             <Form.Item
               name="name"
               label="Full Name"
@@ -577,7 +636,7 @@ const Profile = () => {
                 prefix={<PhoneOutlined />}
                 placeholder="Enter mobile number"
                 size="large"
-                style={{ color: "#52c41a" }}
+                style={{ color: user.mobile ? "#52c41a" : undefined }}
               />
             </Form.Item>
 
@@ -594,11 +653,13 @@ const Profile = () => {
               />
             </Form.Item>
 
+            <Divider orientation="left" style={{ margin: '24px 0' }}>Access Control</Divider>
+
             <Form.Item name="role" label="Role">
               <Select
                 placeholder="Select role"
                 size="large"
-                disabled={user?.role !== "Superadmin"}
+                disabled={user?.role?.toLowerCase() !== "superadmin"}
                 suffixIcon={<CrownOutlined />}
               >
                 <Select.Option value="Superadmin">
@@ -626,7 +687,7 @@ const Profile = () => {
               <Select
                 placeholder="Select status"
                 size="large"
-                disabled={user?.role !== "Superadmin"}
+                disabled={user?.role?.toLowerCase() !== "superadmin"}
               >
                 <Select.Option value="Active">
                   <Space>
@@ -644,11 +705,11 @@ const Profile = () => {
             </Form.Item>
 
             <Alert
-              message="Profile Update"
+              message="Access Control"
               description={
-                user?.role !== "Superadmin"
-                  ? "Role and Status can only be changed by Superadmin users."
-                  : "You can update all profile fields including role and status."
+                user?.role?.toLowerCase() !== "superadmin"
+                  ? "Your **Role** and **Status** fields are locked and can only be changed by a **Superadmin** user."
+                  : "As a **Superadmin**, you can update all profile fields including role and status."
               }
               type="info"
               showIcon

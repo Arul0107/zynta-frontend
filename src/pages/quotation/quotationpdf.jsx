@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import toast from "react-hot-toast";
-import Logo from '../../assets/megacraneq.png';
+import Logo from '../../assets/vrism.png';
 
 // --- Helper functions ---
 const formatCurrency = (amount) => {

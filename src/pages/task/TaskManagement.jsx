@@ -558,25 +558,25 @@ const TaskManagement = () => {
                         />
                     </Col>
                     <Col xs={24} sm={12} md={6}>
-    {/* The Assignee Filter should only be visible to Admin, Team Leader, or Superadmin roles (canAssign) */}
-    {canAssign && (
-        <Select
-            placeholder="Select Assignee"
-            value={assignedToFilter}
-            onChange={setAssignedToFilter}
-            allowClear
-            showSearch
-            style={{ width: "100%" }}
-        >
-            <Option value="">All Assignees</Option>
-            {allUsers.map((user) => (
-                <Option key={user._id} value={user._id}>
-                    {user.name}
-                </Option>
-            ))}
-        </Select>
-    )}
-</Col>
+                        {/* The Assignee Filter should only be visible to Admin, Team Leader, or Superadmin roles (canAssign) */}
+                        {canAssign && (
+                            <Select
+                                placeholder="Select Assignee"
+                                value={assignedToFilter}
+                                onChange={setAssignedToFilter}
+                                allowClear
+                                showSearch
+                                style={{ width: "100%" }}
+                            >
+                                <Option value="">All Assignees</Option>
+                                {allUsers.map((user) => (
+                                    <Option key={user._id} value={user._id}>
+                                        {user.name}
+                                    </Option>
+                                ))}
+                            </Select>
+                        )}
+                    </Col>
                     <Col xs={24} sm={12} md={6}>
                         <Select
                             value={dateFilter}
@@ -645,11 +645,11 @@ const TaskManagement = () => {
 
                                         const canEdit =
                                             canAssign || task.assignedTo?._id === currentUser._id;
-                                        
+
                                         // Flag for TaskForm logic: true if employee editing their own task
-                                        const isEmployeeEdit = 
+                                        const isEmployeeEdit =
                                             !canAssign && task.assignedTo?._id === currentUser._id;
-                                            
+
                                         const canDelete = isAdminOrSuper || canAssign;
 
                                         return (
@@ -756,7 +756,6 @@ const TaskManagement = () => {
                 </Row>
             )}
 
-            {/* Task Creation/Edit Modal */}
             <TaskForm
                 visible={visible}
                 onClose={closeForm}
@@ -766,7 +765,6 @@ const TaskManagement = () => {
                 allServices={allServices}
                 initialValues={editingTask}
                 currentUserId={currentUser._id}
-                // Pass a flag to TaskForm to control field disablement based on user role
                 isEmployeeEdit={!canAssign && editingTask?.assignedTo?._id === currentUser._id}
             />
         </Card>

@@ -1,0 +1,108 @@
+/* File: src/pages/master/cardMaster.css (Zoho Style) */
+
+:root {
+  /* Zoho-like palette */
+  --zoho-blue: #2d67d2;
+  --zoho-light-blue: #e8effe;
+  --text-dark: #333;
+  --text-soft: #555;
+  --bg-page: #f9f9fb;
+  --shadow-subtle: rgba(0, 0, 0, 0.04);
+}
+
+.master-wrapper {
+  padding: 30px;
+  background-color: var(--bg-page);
+  min-height: calc(100vh - 64px);
+}
+
+.master-title {
+  font-size: 26px; /* Slightly smaller and cleaner title */
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 30px;
+  border-bottom: 2px solid var(--zoho-light-blue);
+  padding-bottom: 10px;
+}
+
+.master-grid {
+  display: grid;
+  /* Very small cards, allow more per row */
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+  gap: 20px;
+}
+
+.master-card {
+  height: 120px !important; /* Small Card Height */
+  border-radius: 8px !important; /* Sharp, modern corners */
+  background: #ffffff !important;
+  box-shadow: 0 1px 4px var(--shadow-subtle) !important;
+  border: 1px solid #e9e9e9 !important;
+  transition: all 0.2s ease !important;
+  position: relative; /* Needed for the accent bar */
+  overflow: hidden;
+}
+
+/* Target Antd Card body for internal layout */
+.master-card .ant-card-body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+}
+
+.master-card:hover {
+  transform: translateY(-2px); /* Subtle lift */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+  border-color: var(--zoho-blue) !important;
+}
+
+/* Accent Bar on the left (Zoho Style) */
+.master-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px; /* Thin accent bar */
+  height: 100%;
+  background-color: #ccc; /* Default grey color */
+  transition: background-color 0.2s ease;
+}
+
+.master-card:hover::before {
+  background-color: var(--zoho-blue);
+}
+
+.thumb-icon {
+  font-size: 30px; /* Small icon size */
+  color: var(--zoho-blue);
+  margin-bottom: 8px;
+}
+
+.thumb-title {
+  font-size: 14px; /* Small text size */
+  font-weight: 600;
+  color: var(--text-soft);
+  text-align: center;
+  line-height: 1.2;
+}
+
+
+/* --- Color Accent Customization (Optional, based on module) --- */
+
+/* Sales/Lead Focus (e.g., Leads, Quotations) */
+.card-leads::before, .card-quotations::before { background-color: #2ecc71; } 
+.card-leads:hover::before, .card-quotations:hover::before { background-color: #27ae60; }
+
+/* User/People Focus (e.g., Clients, Profile, Management) */
+.card-clients::before, .card-profile::before, .card-user-management::before { background-color: #f39c12; }
+.card-clients:hover::before, .card-profile:hover::before, .card-user-management:hover::before { background-color: #e67e22; }
+
+/* Finance/Wallet Focus */
+.card-wallets::before { background-color: #e74c3c; }
+.card-wallets:hover::before { background-color: #c0392b; }
+
+/* General/Utility (Dashboard, Settings, etc.) */
+.card-dashboard::before, .card-settings::before { background-color: var(--zoho-blue); }

@@ -1,0 +1,96 @@
+/* ================================
+   MOBILE DOCUMENT UI (WhatsApp)
+================================ */
+
+.mob-doc-card {
+  display: flex;
+  align-items: center;
+  background: #d1f4cc;
+  border-radius: 14px;
+  padding: 12px;
+  margin-top: 8px;
+  max-width: 85%;
+  gap: 12px;
+  border: 1px solid #b9e6b4;
+}
+
+.mob-doc-left {
+  display: flex;
+  align-items: center;
+}
+
+.mob-doc-icon {
+  font-size: 26px;
+  color: #d92121;
+  background: #ffd4d4;
+  padding: 8px;
+  border-radius: 10px;
+}
+
+.mob-doc-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.mob-doc-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #064b00;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mob-doc-meta {
+  font-size: 11px;
+  margin-top: 2px;
+  color: #2e5f2e;
+}
+
+.mob-doc-right {
+  display: flex;
+  align-items: center;
+}
+
+.mob-doc-download {
+  font-size: 22px;
+  color: #064b00;
+}
+
+/* IMAGE */
+.mob-attach-image {
+  width: 160px;
+  border-radius: 12px;
+}
+
+/* VIDEO */
+.mob-attach-video {
+  width: 180px;
+  border-radius: 12px;
+}
+
+/* AUDIO */
+.mob-attach-audio {
+  width: 190px;
+  margin-top: 8px;
+}
+
+/* ZOOM PREVIEW */
+.mob-zoom-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 6000;
+}
+
+.mob-zoom-image {
+  width: 95%;
+  border-radius: 10px;
+}

@@ -1,0 +1,73 @@
+.task-details-drawer .ant-drawer-body {
+  background: #f7f8fa;
+  padding: 20px;
+}
+
+.task-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.task-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.task-status {
+  width: fit-content;
+  font-size: 14px;
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.edit-btn {
+  align-self: flex-start;
+  margin-top: 8px;
+  padding: 6px 16px;
+  background: #1677ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.edit-btn:hover {
+  background: #0f5ed2;
+}
+
+.task-section-card {
+  margin-top: 16px;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.label {
+  font-weight: 500;
+  color: #666;
+}
+
+.value {
+  font-weight: 600;
+  margin-left: 6px;
+}
+
+.user-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.description-text {
+  line-height: 1.5;
+  color: #444;
+  white-space: pre-wrap;
+}

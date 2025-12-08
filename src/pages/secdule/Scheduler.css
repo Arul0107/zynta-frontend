@@ -1,0 +1,346 @@
+/* File: src/components/Scheduler/Scheduler.css */
+
+/* --- GENERAL LAYOUT & CALENDAR OVERRIDES --- */
+
+/* Ensures the main container fills the available space */
+.scheduler-full-container {
+    padding: 20px;
+    background-color: #f0f2f5;
+    min-height: calc(100vh - 64px); /* Adjust based on your header height */
+}
+
+.calendar-main-content {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+}
+
+/* FullCalendar styling adjustments */
+.fc {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+}
+
+/* Day/Week View Header (Time Labels) */
+.fc-timegrid-slot-label-frame,
+.fc-col-header-cell {
+    font-weight: 600;
+}
+
+/* Time Grid Background Styling */
+.fc .fc-timegrid-slot {
+    height: 1.5em; /* Adjust slot height for a tighter view */
+    border-bottom: 1px dashed #e0e0e0;
+}
+
+.fc-timegrid-slots table {
+    border-top: none;
+}
+
+/* --- CUSTOM TOOLBAR --- */
+.advanced-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.view-mode-buttons .ant-btn {
+    margin-right: 8px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.view-mode-buttons .ant-btn-primary {
+    background-color: #1677ff;
+    border-color: #1677ff;
+}
+
+.add-event-button {
+    background-color: #0e2b43;
+    border-color: #0e2b43;
+    color: white;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.add-event-button:hover {
+    background-color: #1e4566 !important;
+    border-color: #1e4566 !important;
+    color: white !important;
+}
+
+/* --- CUSTOM EVENT CONTENT --- */
+.custom-event-content {
+    padding: 2px 4px;
+    white-space: normal;
+    overflow: hidden;
+    color: #ffffff;
+}
+
+.event-time {
+    font-size: 10px;
+    opacity: 0.8;
+}
+
+.event-title-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 5px;
+}
+
+.event-title {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    flex-grow: 1;
+}
+
+.event-priority-tag {
+    font-size: 10px;
+    padding: 0 4px;
+    height: 16px;
+    line-height: 16px;
+    border-radius: 3px;
+    /* To make the tag visible on the event background */
+    background: rgba(255, 255, 255, 0.9) !important; 
+    font-weight: 500;
+}
+
+.event-meta {
+    margin-top: 3px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    opacity: 0.9;
+}
+
+.event-meta .ant-tag {
+    font-size: 9px;
+    padding: 0 4px;
+    height: 14px;
+    line-height: 14px;
+    border-radius: 3px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.2); /* Semi-transparent tags */
+}
+
+/* Ensure the fullcalendar event container adapts to the content */
+.fc-event {
+    /* Override default styles for a cleaner look */
+    border: none !important;
+    padding: 3px;
+}
+
+/* --- EVENT FORM DRAWER --- */
+.event-form-drawer .ant-drawer-body {
+    padding-bottom: 70px; /* Space for fixed footer */
+}
+
+.drawer-footer-actions {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 10px 24px;
+    border-top: 1px solid #f0f0f0;
+    background: #ffffff;
+    z-index: 10;
+}
+
+.color-preview-input {
+    width: 60px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* --- YEAR VIEW --- */
+.year-view-container {
+    padding: 20px;
+}
+
+.year-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 25px;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.year-list {
+    display: flex;
+    gap: 15px;
+    margin: 0 20px;
+}
+
+.year-item {
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: all 0.3s;
+    opacity: 0.6;
+}
+
+.year-item:hover {
+    opacity: 1;
+    color: #1677ff;
+}
+
+.year-item.active-year {
+    background-color: #e6f7ff;
+    color: #1677ff;
+    opacity: 1;
+    font-weight: 700;
+}
+
+.arrow-button {
+    font-size: 16px;
+    font-weight: 500;
+    color: #595959;
+}
+
+/* Year Grid */
+.year-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.year-month-card {
+    background-color: #fafafa;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s;
+    cursor: pointer;
+    border-left: 5px solid #1677ff; /* Accent line */
+}
+
+.year-month-card:hover {
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.month-title {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 18px;
+    color: #1677ff;
+    font-weight: 600;
+}
+
+.month-count-badge .ant-tag {
+    font-size: 12px;
+    height: 22px;
+    line-height: 22px;
+    margin-bottom: 10px;
+}
+
+.month-preview {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 12px;
+}
+
+.month-preview li {
+    padding: 2px 0;
+    color: #595959;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.more-events {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #8c8c8c;
+    font-style: italic;
+}
+
+/* --- YEAR DETAIL DRAWER (Events List) --- */
+.month-event-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0 0;
+}
+
+.month-event-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    background-color: #fff;
+    border: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.month-event-item:hover {
+    background-color: #e6f7ff;
+    border-color: #91d5ff;
+}
+
+.event-color-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 10px;
+    padding: 0;
+    border: none;
+}
+
+.event-details {
+    line-height: 1.3;
+}
+
+.event-list-title {
+    font-size: 14px;
+    color: #595959;
+}/* File: src/components/Scheduler/Scheduler.css */
+
+/* ... (Keep all other existing CSS for advanced UI design) ... */
+
+/* --- FullCalendar Styling Overrides for Size --- */
+
+/* Increase the default height of the time slots */
+.fc .fc-timegrid-slot {
+    /* DEFAULT was 1.5em (approx 24px). Changing to a fixed pixel value makes it much bigger. */
+    height: 35px; 
+    border-bottom: 1px dashed #e0e0e0;
+}
+
+/* Ensure half slots also scale correctly if they exist */
+.fc .fc-timegrid-slot.fc-timegrid-slot-minor {
+    height: 17.5px; /* Half of the main slot height (35px) */
+}
+
+/* Increase font size for the time axis (e.g., 9am, 10am) */
+.fc-timegrid-slot-label-cushion {
+    font-size: 14px; /* Larger text for the time labels */
+    padding-top: 5px; /* Adjust padding if needed */
+}
+
+/* Ensure the calendar itself takes up the necessary height */
+.fc {
+    height: 900px; /* Set a specific height for the main calendar wrapper */
+    max-height: calc(100vh - 200px); /* Or use max-height relative to viewport */
+    width: 100%;
+}
+
+/* Day/Week View Header (e.g., Mon 27) */
+.fc-col-header-cell {
+    padding: 10px 0;
+    font-size: 14px;
+}

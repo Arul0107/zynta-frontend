@@ -28,6 +28,7 @@ import {
     MoreOutlined,
     FilePdfOutlined,
     FileExcelOutlined,
+    ArrowUpOutlined, // Added for Bulk Status Update
 } from "@ant-design/icons";
 import { toast } from "react-hot-toast";
 import jsPDF from "jspdf";
@@ -42,8 +43,6 @@ const { TabPane } = Tabs;
 
 const API_URL = "/api/accounts";
 
-// REMOVED: getUniqueZoneFilters helper function as requested.
-
 const Leads = () => {
     const [formVisible, setFormVisible] = useState(false);
     const [currentAccount, setCurrentAccount] = useState(null);
@@ -56,6 +55,12 @@ const Leads = () => {
     const [notesDrawerVisible, setNotesDrawerVisible] = useState(false);
     const [followUpDrawerVisible, setFollowUpDrawerVisible] = useState(false);
     const [selectedAccount, setSelectedAccount] = useState(null);
+
+    // New state for bulk update
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+    const [isBulkModalVisible, setIsBulkModalVisible] = useState(false);
+    const [bulkNewStatus, setBulkNewStatus] = useState(null);
+
 
     // State for filters
     const [tableFilters, setTableFilters] = useState({});
@@ -178,6 +183,8 @@ const Leads = () => {
             console.error("Fetch accounts error:", error);
         } finally {
             setLoadingAccounts(false);
+            // Clear selections after fetch
+            setSelectedRowKeys([]);
         }
     };
 
@@ -295,7 +302,11 @@ const Leads = () => {
 
     const handleConfirmStatusChange = async () => {
         try {
-            const updatedAccount = { ...accountToUpdate, status: newStatus };
+            const updatedAccount = { 
+                ...accountToUpdate, 
+                status: newStatus,
+                isCustomer: newStatus === "Customer" ? true : false, // Also update isCustomer
+            };
             await axios.put(`${API_URL}/${accountToUpdate._id}`, updatedAccount);
             toast.success(`Account status changed to ${newStatus}!`);
             // Re-fetch data and counts
@@ -325,6 +336,60 @@ const Leads = () => {
         setAccountToUpdate(null);
         setNewStatus(null);
     };
+
+    // --- Bulk Status Update Handlers ---
+
+    const handleBulkStatusChange = (statusValue) => {
+        if (selectedRowKeys.length === 0) {
+            toast.error("Please select at least one account for bulk action.");
+            return;
+        }
+        setBulkNewStatus(statusValue);
+        setIsBulkModalVisible(true);
+    };
+
+    const handleConfirmBulkStatusChange = async () => {
+        try {
+            const payload = {
+                ids: selectedRowKeys,
+                status: bulkNewStatus,
+            };
+
+            // Assuming the new backend route is /api/accounts/bulk-status-update (router.put)
+            await axios.put(`${API_URL}/bulk-status-update`, payload); 
+
+            toast.success(`Successfully updated ${selectedRowKeys.length} accounts to ${bulkNewStatus}!`);
+            
+            setIsBulkModalVisible(false);
+            setBulkNewStatus(null);
+            setSelectedRowKeys([]); // Clear selection
+
+            // Re-fetch data and counts
+            fetchPaginatedAccounts({
+                current: pagination.current,
+                pageSize: pagination.pageSize,
+                searchText: searchText,
+                activeTab: activeTab,
+                filters: tableFilters
+            });
+            fetchAllTabCounts();
+
+        } catch (error) {
+            toast.error("Failed to perform bulk status update.");
+            console.error(
+                "Bulk status update error:",
+                error.response?.data || error.message
+            );
+        }
+    };
+
+    const handleCancelBulkStatusChange = () => {
+        setIsBulkModalVisible(false);
+        setBulkNewStatus(null);
+    };
+
+    // --- End Bulk Status Update Handlers ---
+
 
     const exportTableToPdf = async () => {
         const input = tableRef.current;
@@ -667,6 +732,48 @@ const Leads = () => {
         });
     };
 
+    // Row selection object for Ant Design Table
+    const rowSelection = {
+        selectedRowKeys,
+        onChange: (newSelectedRowKeys) => {
+            setSelectedRowKeys(newSelectedRowKeys);
+        },
+        getCheckboxProps: (record) => ({
+             // Disable checkbox for 'Customer' or 'Closed' if you don't want to modify them further
+            disabled: record.status === 'Customer' || record.status === 'Closed', 
+        }),
+    };
+
+
+    // Dropdown menu for bulk actions
+    const bulkActionMenu = (
+        <Menu>
+            <Menu.Item 
+                key="customer" 
+                icon={<ArrowUpOutlined />} 
+                onClick={() => handleBulkStatusChange("Customer")}
+            >
+                Bulk Convert to **Client**
+            </Menu.Item>
+            <Menu.Item 
+                key="active" 
+                icon={<ArrowUpOutlined />} 
+                onClick={() => handleBulkStatusChange("Active")}
+            >
+                Bulk Convert to **Active Lead**
+            </Menu.Item>
+            <Menu.Item 
+                key="pipeline" 
+                icon={<ArrowUpOutlined />} 
+                onClick={() => handleBulkStatusChange("Pipeline")}
+            >
+                Bulk Convert to **Enquiry**
+            </Menu.Item>
+             {/* Add more bulk status options as needed */}
+        </Menu>
+    );
+
+
     return (
         <Card title={<Title level={4}>Manage Leads & Clinets</Title>}>
             <div
@@ -690,6 +797,19 @@ const Leads = () => {
                     }}
                 />
                 <Space>
+                    
+                    {/* Bulk Action Dropdown */}
+                    {selectedRowKeys.length > 0 && (
+                        <Dropdown overlay={bulkActionMenu} trigger={['click']}>
+                            <Button
+                                type="default"
+                                className="add-event-button"
+                            >
+                                Bulk Actions ({selectedRowKeys.length} selected)
+                            </Button>
+                        </Dropdown>
+                    )}
+                    
                     <Button
                         type="primary"
                         icon={<PlusOutlined />}
@@ -715,7 +835,7 @@ const Leads = () => {
                 }}
             >
                 <TabPane tab={`All Leads (${counts.all || 0})`} key="all" />
-                <TabPane tab={`Target Leads (${counts.targetLeads || 0})`} key="TargetLeads" />
+                <TabPane tab={`Target Leads (${counts.TargetLeads || 0})`} key="TargetLeads" />
                 <TabPane tab={`Lead (${counts.active || 0})`} key="Active" />
                 <TabPane tab={`Enquiry (${counts.Pipeline || 0})`} key="Pipeline" />
                 <TabPane tab={`Quotations Sent (${counts.quotations || 0})`} key="Quotations" />
@@ -734,6 +854,7 @@ const Leads = () => {
                         scroll={{ x: "max-content" }}
                         pagination={pagination}
                         onChange={handleTableChange}
+                        rowSelection={rowSelection} // Added row selection
                     />
                 ) : (
                     <Empty description="No accounts found." />
@@ -747,7 +868,6 @@ const Leads = () => {
                 initialValues={currentAccount}
                 allUsers={users}
                 loadingUsers={loadingUsers}
-                // Removed allZones property as per request
             />
 
             {selectedAccount && (
@@ -798,8 +918,26 @@ const Leads = () => {
                     **{newStatus}**?
                 </p>
             </Modal>
+
+            {/* Bulk Status Update Modal */}
+            <Modal
+                title="Confirm Bulk Status Update"
+                open={isBulkModalVisible}
+                onOk={handleConfirmBulkStatusChange}
+                onCancel={handleCancelBulkStatusChange}
+                okText="Yes, Update"
+                cancelText="No"
+                okButtonProps={{ 
+                    style: { backgroundColor: "#1890ff", borderColor: "#1890ff" }
+                }}
+            >
+                <p>
+                    You are about to update the status of **{selectedRowKeys.length}** accounts to **{bulkNewStatus}**. 
+                    Are you sure you want to proceed?
+                </p>
+            </Modal>
         </Card>
     );
 };
 
-export default Leads;   
+export default Leads;

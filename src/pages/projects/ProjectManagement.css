@@ -1,0 +1,17 @@
+.project-container {
+  padding: 20px;
+}
+
+.project-card {
+  border-radius: 12px !important;
+  transition: 0.2s ease-in-out;
+}
+
+.project-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+}
+
+.ant-drawer-title {
+  font-weight: bold;
+}

@@ -22,9 +22,7 @@
   cursor: pointer;
 }
 
-.tab-item:hover {
-  color: #0E2B43;
-}
+
 
 .active-tab {
   color: #ffffff;

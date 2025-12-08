@@ -1,81 +1,105 @@
-// src/components/Login.jsx
-import React, { useState } from 'react';
-import { Form, Input, Button, Card } from 'antd';
-import { useNavigate } from 'react-router-dom';
-import axios from '../api/axios';
-import toast from 'react-hot-toast';
-import '../css/Login.css';
-import loginImage from '../assets/login.png';
-import { UserOutlined } from "@ant-design/icons";
+import React, { useState, useEffect, useContext } from "react";
+import { Form, Input, Button, Card } from "antd";
+import { useNavigate } from "react-router-dom";
+import axios from "../api/axios";
+import toast from "react-hot-toast";
+import "../css/Login.css";
+import { PresenceContext } from "../context/PresenceContext";
+import logo from "../assets/vrismw.png";
 
 const Login = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const { socket } = useContext(PresenceContext);
+
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+    window.onpopstate = () => navigate("/login", { replace: true });
+  }, []);
 
   const onFinish = async (values) => {
     try {
-      setLoading(true); // ✅ Start loading
-      const res = await axios.post('/api/auth/login', {
+      setLoading(true);
+
+      const res = await axios.post("/api/auth/login", {
         username: values.email,
-        password: values.password
+        password: values.password,
       });
 
       const { user, token } = res.data;
 
-      localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('token', token);
-      localStorage.setItem('token_expiry', Date.now() + 2 * 24 * 60 * 60 * 1000);
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("token", token);
+      localStorage.setItem("token_expiry", Date.now() + 2 * 24 * 60 * 60 * 1000);
+
+      await axios.post("/api/users/status/update", {
+        userId: user._id,
+        presence: "online",
+      });
+
+      socket.emit("presence_change", {
+        userId: user._id,
+        presence: "online",
+      });
 
       toast.success(`Welcome ${user.name}!`);
 
-      if (["Employee", "TeamLead"].includes(user.role)) {
-        navigate('/attendance');
+      if (user.role === "SuperAdmin" || user.role === "Admin") {
+        navigate("/taskmanage");
+      } else if (user.role === "Team Leader" || user.role === "Employee") {
+        navigate("/attendance");
+      } else if (user.role === "Client") {
+        navigate("/subscriptions");
       } else {
-        navigate('/eodreport');
+        navigate("/eodreport");
       }
     } catch (err) {
-      toast.error('Invalid credentials');
+      toast.error("Invalid credentials");
     } finally {
-      setLoading(false); // ✅ Stop loading no matter success or fail
+      setLoading(false);
     }
   };
 
   return (
     <div className="login-wrapper">
       <div className="login-left">
-        <Card className="login-card" bordered={false}>
-          <h2 className="login-title">
-            Log In <UserOutlined style={{ background: "#0E2B43", color: "white", padding: "20px", borderRadius: "50%" }} />
-          </h2>
-          <p className="login-subtitle">Welcome back! Please enter your details</p>
-          <Form layout="vertical" onFinish={onFinish}>
-            <Form.Item
-              name="email"
-              label="Email"
-              rules={[{ required: true, message: 'Please enter your email' }]}
-            >
-              <Input placeholder="Enter email" />
-            </Form.Item>
+        <img src={logo} alt="Vrism Logo" className="logo-img" />
 
-            <Form.Item
-              name="password"
-              label="Password"
-              rules={[{ required: true, message: 'Please enter your password' }]}
-            >
-              <Input.Password placeholder="Enter password" />
-            </Form.Item>
+        <Card className="login-card" bordered={false}>
+          <h2 className="login-title">Log In</h2>
+          <p className="login-subtitle">Welcome back! Please enter your details</p>
+
+          <Form layout="vertical" onFinish={onFinish}>
+          <Form.Item
+  name="email"
+  label={<span style={{ color: "#fff" }}>Email</span>}
+  rules={[{ required: true, message: "Please enter your email" }]}
+>
+  <Input placeholder="Enter email" />
+</Form.Item>
+
+<Form.Item
+  name="password"
+  label={<span style={{ color: "#fff" }}>Password</span>}
+  rules={[{ required: true, message: "Please enter your password" }]}
+>
+  <Input.Password placeholder="Enter password" />
+</Form.Item>
+
 
             <div className="forgot-password-wrapper">
-              <a href="#" className="forgot-password">Forgot password?</a>
+              <a href="/forgot-password" className="forgot-password">
+                Forgot password?
+              </a>
             </div>
 
             <Form.Item>
-              <Button 
-                type="primary" 
-                htmlType="submit" 
-                block 
+              <Button
+                type="primary"
+                htmlType="submit"
+                block
                 className="login-button"
-                loading={loading}  // ✅ Show spinner here
+                loading={loading}
               >
                 {loading ? "Logging in..." : "Log in"}
               </Button>
@@ -84,9 +108,8 @@ const Login = () => {
         </Card>
       </div>
 
-      <div className="login-right">
-        <img src={loginImage} alt="Login visual" className='loginimg' />
-      </div>
+      {/* Right side image */}
+      <div className="login-right"></div>
     </div>
   );
 };

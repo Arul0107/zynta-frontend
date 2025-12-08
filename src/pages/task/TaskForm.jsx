@@ -1,342 +1,311 @@
-import React, { useState, useEffect, forwardRef } from "react";
+// src/components/TaskForm.jsx
+import React, { useEffect, useState } from "react";
 import {
-  Modal,
+  Drawer,
   Form,
   Input,
   Select,
   Row,
   Col,
-  Avatar,
-  Tag,
-  Space,
+  Button,
+  message,
+  Card,
+  Typography,
+  Switch,
+  TimePicker
 } from "antd";
-import {
-  UserOutlined,
-  ClockCircleOutlined,
-  FileTextOutlined,
-  BankOutlined,
-  ToolOutlined,
-  CalendarOutlined,
-} from "@ant-design/icons";
-import { toast } from "react-hot-toast";
+
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import moment from "moment";
-import DatePicker from "react-datepicker"; 
-import "react-datepicker/dist/react-datepicker.css"; 
-// import "./TaskManagement.css"; // Assuming TaskForm has its own minimal styles
+import axios from "../../api/axios";
+import "./TaskForm.css";
 
-const { Option } = Select;
 const { TextArea } = Input;
+const { Option } = Select;
+const { Title, Text } = Typography;
 
-const STATUS_COLORS = {
-  "To Do": "red",
-  "In Progress": "orange",
-  Review: "blue",
-  Completed: "green",
-  "Overdue": "#7f00ff", 
-};
-
-// Custom Input for React DatePicker to use Ant Design styling
-const CustomAntInput = forwardRef(({ value, onClick, ...rest }, ref) => (
-  <Input 
-    value={value} 
-    onClick={onClick} 
-    ref={ref} 
-    readOnly={true}
-    style={{ width: "100%", cursor: 'pointer' }}
-    suffix={<CalendarOutlined style={{ color: '#aaa' }} />}
-    {...rest}
-  />
-));
-
-
-const TaskForm = ({
-  visible,
-  onClose,
-  onSave,
-  initialValues,
-  allUsers = [],
-  allAccounts = [],
-  allServices = [],
-  currentUserId,
-  isEmployeeEdit, // 🎯 NEW PROP
-}) => {
+const TaskForm = ({ visible, onClose, editing, onSaved }) => {
   const [form] = Form.useForm();
-  const [fileList, setFileList] = useState([]);
-  
+
+  const currentUser =
+    JSON.parse(localStorage.getItem("user")) || {
+      _id: "temp",
+      role: "Employee",
+      name: "You"
+    };
+
+  const canAssign = ["Admin", "TeamLead", "SuperAdmin", "Superadmin"].includes(
+    currentUser.role
+  );
+
+  // Dropdowns
+  const [allUsers, setAllUsers] = useState([]);
+  const [accounts, setAccounts] = useState([]);
+  const [services, setServices] = useState([]);
+
+  // Time & Date
   const [assignedDate, setAssignedDate] = useState(new Date());
-  const [dueDate, setDueDate] = useState(moment().add(1, 'days').toDate());
+  const [dueDate, setDueDate] = useState(moment().add(1, "days").toDate());
+const [startTime, setStartTime] = useState(moment("09:00 AM", "hh:mm A"));
+  const [saving, setSaving] = useState(false);
 
-  // Initialize form fields and date states
+  // Load users, accounts, services
   useEffect(() => {
-    // Reset form for a clean start when modal opens
-    form.resetFields(); 
-    setAssignedDate(new Date());
-    setDueDate(moment().add(1, 'days').toDate());
-    setFileList([]);
+    const loadAll = async () => {
+      try {
+        const u = await axios.get("/api/users");
+        setAllUsers(u.data || []);
 
-    if (visible && initialValues && Object.keys(initialValues).length > 0) {
-      // --- EDIT MODE LOGIC ---
-      
-      const initAssignedDate = initialValues.assignedDate
-        ? new Date(initialValues.assignedDate)
-        : new Date();
-      const initDueDate = initialValues.dueDate
-        ? new Date(initialValues.dueDate)
-        : moment().add(1, "days").toDate(); 
+        const a = await axios.get("/api/accounts");   // ✔ Correct API
+        setAccounts(a.data || []);
 
-      setAssignedDate(initAssignedDate);
-      setDueDate(initDueDate);
+        const s = await axios.get("/api/service");    // ✔ Correct API
+        setServices(s.data || []);
 
-      // Set form fields for editing
+      } catch (err) {
+        console.error("Dropdown Load Error:", err);
+      }
+    };
+    loadAll();
+  }, []);
+
+  // Load existing data for editing
+  useEffect(() => {
+    form.resetFields();
+
+    if (editing) {
       form.setFieldsValue({
-        ...initialValues,
-        assignedTo: initialValues?.assignedTo?._id || undefined,
-        accountId: initialValues?.accountId?._id || undefined,
-        serviceId: initialValues?.serviceId?._id || undefined,
-        status: initialValues?.status || "To Do", 
+        title: editing.title,
+        description: editing.description,
+        assignedTo: editing.assignedTo?._id,
+        status: editing.status,
+
+        // new fields
+        reason: editing.reason,
+        timeRequired: editing.timeRequired,
+        extraAttachment: editing.extraAttachment?.[0] || "",
+        isImportant: editing.isImportant || false,
+
+        accountId: editing.accountId?._id,
+        serviceId: editing.serviceId?._id
       });
 
-      // (File list logic omitted for brevity)
-      setFileList(
-        initialValues?.attachments?.map((name, index) => ({
-          uid: `-${index}`,
-          name,
-          status: "done",
-          url: `/uploads/${name}`,
-        })) || []
+      setStartTime(
+        editing.startTime ? moment(editing.startTime, "HH:mm") : moment("09:00", "HH:mm")
       );
-    } else if (visible && !initialValues) {
-        // --- CREATE MODE LOGIC ---
-        // Set defaults for new task
-        form.setFieldsValue({
-            status: "To Do", 
-            assignedTo: currentUserId, // Default assignedTo to the current user
-        });
+
+      setAssignedDate(editing.assignedDate ? new Date(editing.assignedDate) : new Date());
+      setDueDate(
+        editing.dueDate ? new Date(editing.dueDate) : moment().add(1, "days").toDate()
+      );
+
+    } else {
+      form.setFieldsValue({
+        assignedTo: currentUser._id,
+        status: "To Do",
+        isImportant: false
+      });
+
+      setAssignedDate(new Date());
+      setStartTime(moment("09:00", "HH:mm"));
+      setDueDate(moment().add(1, "days").toDate());
     }
-    // Cleanup is handled by the initial reset and conditional logic.
-  }, [visible, initialValues, form, currentUserId]);
+  }, [editing, visible]);
 
-  // Handler for date changes and validators (no change required here)
-  const handleAssignedDateChange = (date) => {
-    setAssignedDate(date);
-    form.validateFields(['assignedDate']);
-  };
-
-  const handleDueDateChange = (date) => {
-    setDueDate(date);
-    form.validateFields(['dueDate']);
-  };
-  
-  const validateAssignedDate = (_, value) => {
-      if (!assignedDate) {
-          return Promise.reject(new Error("Select assigned date!"));
-      }
-      return Promise.resolve();
-  };
-
-  const validateDueDate = (_, value) => {
-      if (!dueDate) {
-          return Promise.reject(new Error("Select due date!"));
-      }
-      return Promise.resolve();
-  };
-
-  // Handle form submission
-  const handleOk = async () => {
+  // Save task
+  const handleSave = async () => {
     try {
-      const nonDateValues = await form.validateFields();
-      
-      const assignedDateMoment = moment(assignedDate);
-      const dueDateMoment = moment(dueDate);
+      const values = await form.validateFields();
 
-      // ... (date validation logic) ...
-      if (!assignedDate || !dueDate) {
-          toast.error("Please select both assigned and due dates!");
-          return;
-      }
-      if (dueDateMoment.isBefore(assignedDateMoment, "day")) {
-        toast.error("Due date cannot be before assigned date!");
-        return;
-      }
+      const payload = {
+        ...values,
 
-      // Prepare data for saving
-      const dataToSend = {
-        ...nonDateValues,
-        assignedDate: moment.utc(assignedDateMoment.startOf("day")).toISOString(),
-        dueDate: moment.utc(dueDateMoment.startOf("day")).toISOString(),
-        attachments: fileList.map((f) => f.name),
+        assignedDate: moment.utc(assignedDate).startOf("day").toISOString(),
+        dueDate: moment.utc(dueDate).startOf("day").toISOString(),
+
+        startTime: startTime.format("HH:mm"),
+
+        extraAttachment: values.extraAttachment ? [values.extraAttachment] : []
       };
 
-      // Ensure assignedBy is sent only on CREATE (and only if the backend doesn't handle it)
-      if (!initialValues) {
-        dataToSend.assignedBy = currentUserId; 
-      }
-      
-      // If employee is editing, only send fields they are allowed to change (Status & Description)
-      if (isEmployeeEdit) {
-          const employeeData = {
-              status: dataToSend.status,
-              description: dataToSend.description,
-          };
-          await onSave(employeeData, initialValues?._id);
+      setSaving(true);
+
+      if (editing) {
+        payload.assignedBy = editing.assignedBy?._id;
+        await axios.put(`/api/tasks/${editing._id}`, payload);
+        message.success("Task updated");
       } else {
-          await onSave(dataToSend, initialValues?._id);
+        payload.assignedBy = currentUser._id;
+        await axios.post("/api/tasks", payload);
+        message.success("Task created");
       }
-      
+
+      onSaved?.();
       onClose();
-    } catch (error) {
-      console.error("Task Form Submission Error:", error);
-      if (error.errorFields) {
-          toast.error("Please fill out all required fields.");
-      } else {
-          toast.error(`Failed to save task: ${error.message || 'Unknown error'}`);
-      }
+
+    } catch (err) {
+      console.error(err);
+      message.error("Save failed: " + (err.response?.data?.message || err.message));
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <Modal
-      title={initialValues ? "Edit Task" : "Create New Task"}
+    <Drawer
+      title={editing ? "Edit Task" : "Create Task"}
+      width={700}
       open={visible}
-      onOk={handleOk}
-      onCancel={onClose}
-      okText="Save Task"
-      width={650}
+      onClose={onClose}
+      destroyOnClose
+      forceRender   // ✔ FIX WARNING
+      footer={
+        <div style={{ textAlign: "right" }}>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button type="primary" loading={saving} onClick={handleSave}>
+            {editing ? "Update Task" : "Create Task"}
+          </Button>
+        </div>
+      }
     >
       <Form form={form} layout="vertical">
-        {/* Task Title - DISABLED for Employee Edit */}
-        <Form.Item
-          name="title"
-          label={<Space><FileTextOutlined /> Task Title</Space>}
-          rules={[{ required: true, message: "Please enter the task title!" }]}
-        >
-          <Input 
-            placeholder="E.g., Implement user authentication module" 
-            disabled={isEmployeeEdit} // 🎯 DISABLED
-          />
-        </Form.Item>
 
-        {/* Description - ENABLED for Employee Edit */}
-        <Form.Item name="description" label="Description">
-          <TextArea 
-            rows={4} 
-            placeholder="Detailed description of the task requirements..." 
-          />
-        </Form.Item>
+        {/* BASIC */}
+        <Card className="zoho-section-card">
+          <Title level={5}>Basic Information</Title>
 
-        {/* Assign To + Status */}
-        <Row gutter={16}>
-          <Col span={12}>
-            {/* Assign To - DISABLED for Employee Edit */}
-            <Form.Item
-              name="assignedTo"
-              label={<Space><UserOutlined /> Assign To</Space>}
-              rules={[{ required: true, message: "Select a team member!" }]}
-            >
-              <Select 
-                placeholder="Select assignee" 
-                showSearch
-                disabled={isEmployeeEdit} // 🎯 DISABLED
+          <Form.Item
+            name="title"
+            label="Task Title *"
+            rules={[{ required: true }]}
+          >
+            <Input placeholder="Enter task title" />
+          </Form.Item>
+
+          <Form.Item name="description" label="Description">
+            <TextArea rows={3} placeholder="Task details" />
+          </Form.Item>
+
+          <Form.Item name="isImportant" label="Mark Important">
+            <Switch />
+          </Form.Item>
+        </Card>
+
+        {/* ADDITIONAL */}
+        <Card className="zoho-section-card">
+          <Title level={5}>Additional Fields</Title>
+
+          <Form.Item name="reason" label="Reason">
+            <TextArea rows={2} placeholder="Why this task?" />
+          </Form.Item>
+     <Form.Item name="startTime" label="Start Time">
+  <TimePicker
+    value={startTime}
+    format="hh:mm A"
+    use12Hours
+    minuteStep={5}
+    inputReadOnly     // 🔥 enables mobile wheel/spinner UI
+    style={{ width: "100%" }}
+    onChange={(v) => setStartTime(v)}
+  />
+</Form.Item>
+
+          <Form.Item name="extraAttachment" label="Attachment URL">
+            <Input placeholder="Paste URL here" />
+          </Form.Item>
+
+           <Title level={5}>Account & Service</Title>
+
+          <Form.Item name="accountId" label="Account">
+            <Select placeholder="Select account">
+              {accounts.map((a) => (
+                <Option key={a._id} value={a._id}>
+                  {a.businessName}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item name="serviceId" label="Service">
+            <Select placeholder="Select service">
+              {services.map((s) => (
+                <Option key={s._id} value={s._id}>
+                  {s.serviceName}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Card>
+
+      
+        {/* ASSIGN */}
+        <Card className="zoho-section-card">
+          <Title level={5}>Assignment</Title>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="assignedTo"
+                label="Assign To"
+                rules={[{ required: true }]}
               >
-                {allUsers.map((user) => (
-                  <Option key={user._id} value={user._id}>
-                    <Space>
-                      <Avatar size="small" icon={<UserOutlined />} style={{ backgroundColor: "#87d068" }} />
-                      {user.name}
-                    </Space>
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
+                <Select disabled={!canAssign}>
+                  {allUsers.map((u) => (
+                    <Option key={u._id} value={u._id}>
+                      {u.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
 
-          <Col span={12}>
-            {/* Status - ENABLED for Employee Edit */}
-            <Form.Item
-              name="status"
-              label={<Space><ClockCircleOutlined /> Status</Space>}
-              rules={[{ required: true, message: "Select status!" }]}
-            >
-              <Select placeholder="Select status">
-                {Object.keys(STATUS_COLORS).map((status) => (
-                  <Option key={status} value={status}>
-                    <Tag color={STATUS_COLORS[status]}>{status}</Tag>
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
+            <Col span={12}>
+              <Form.Item name="status" label="Status">
+                <Select>
+                  <Option value="To Do">To Do</Option>
+                  <Option value="In Progress">In Progress</Option>
+                  <Option value="Review">Review</Option>
+                  <Option value="Completed">Completed</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+        </Card>
 
-        {/* Account + Service - DISABLED for Employee Edit */}
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item name="accountId" label={<Space><BankOutlined /> Link Account</Space>}>
-              <Select 
-                placeholder="Select Business Account" 
-                allowClear 
-                showSearch
-                disabled={isEmployeeEdit} // 🎯 DISABLED
-              >
-                {allAccounts.map((account) => (
-                  <Option key={account._id} value={account._id}>{account.businessName}</Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
+        {/* DATES */}
+        <Card className="zoho-section-card">
+          <Title level={5}>Dates</Title>
 
-          <Col span={12}>
-            <Form.Item name="serviceId" label={<Space><ToolOutlined /> Link Service</Space>}>
-              <Select 
-                placeholder="Select Brand Service" 
-                allowClear 
-                showSearch
-                disabled={isEmployeeEdit} // 🎯 DISABLED
-              >
-                {allServices.map((service) => (
-                  <Option key={service._id} value={service._id}>{service.serviceName}</Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item label="Assigned Date">
+                <DatePicker
+                  selected={assignedDate}
+                  onChange={setAssignedDate}
+                  dateFormat="yyyy/MM/dd"
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Due Date">
+                <DatePicker
+                  selected={dueDate}
+                  onChange={setDueDate}
+                  dateFormat="yyyy/MM/dd"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
-        {/* Dates - DISABLED for Employee Edit */}
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              name="assignedDate"
-              label="Assigned Date"
-              rules={[{ validator: validateAssignedDate }]} 
-            >
-              <DatePicker
-                selected={assignedDate}
-                onChange={handleAssignedDateChange}
-                dateFormat="yyyy/MM/dd"
-                customInput={<CustomAntInput />} 
-                disabled={isEmployeeEdit} // 🎯 DISABLED
-              />
-            </Form.Item>
-          </Col>
+          <Text>
+            Assigned By:{" "}
+            <b>{editing ? editing.assignedBy?.name : currentUser.name}</b>
+          </Text>
+        </Card>
 
-          <Col span={12}>
-            <Form.Item
-              name="dueDate"
-              label="Due Date"
-              rules={[{ validator: validateDueDate }]}
-            >
-              <DatePicker
-                selected={dueDate}
-                onChange={handleDueDateChange}
-                dateFormat="yyyy/MM/dd"
-                customInput={<CustomAntInput />}
-                disabled={isEmployeeEdit} // 🎯 DISABLED
-              />
-            </Form.Item>
-          </Col>
-        </Row>
       </Form>
-    </Modal>
+    </Drawer>
   );
 };
 

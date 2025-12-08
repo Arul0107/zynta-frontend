@@ -7,6 +7,9 @@ import {
   FileAddOutlined,
   PlusOutlined,
   ClockCircleOutlined,
+  CheckSquareTwoTone,
+  MessageFilled,
+  LockFilled,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./MobileTabMenu.css";
@@ -24,20 +27,27 @@ const MobileNavbar = () => {
       key: "/dashboard",
       icon: <DashboardOutlined />,
       label: "Dashboard",
-      roles: ["Admin", "Superadmin", "Employee"],
+      roles: ["Admin", "Superadmin","Team Leader"],
     },
     {
       key: "/attendance",
       icon: <ClockCircleOutlined />,
       label: "Timesheet",
-      roles: ["Admin", "Superadmin", "Employee"],
+      roles: ["Admin", "Superadmin", "Employee","Team Leader"],
     },
     {
-      key: "/leads",
-      icon: <SolutionOutlined />,
-      label: "Leads",
-      roles: ["Admin", "Superadmin"],
+      key: "/taskmanage",
+      icon: <PlusOutlined />,
+      label: "Task",
+      roles: ["Admin", "Superadmin","Employee","Team Leader"],
     },
+    {
+      key: "/chat",
+      icon: <MessageFilled />,
+      label: "Timesheet",
+      roles: ["Admin", "Superadmin", "Employee","Team Leader"],
+    },
+    
     {
       key: "/quotation",
       icon: <FileTextOutlined />,
@@ -57,10 +67,10 @@ const MobileNavbar = () => {
       roles: ["Admin", "Superadmin"],
     },
     {
-      key: "/taskmanage",
-      icon: <PlusOutlined />,
-      label: "Task",
-      roles: ["Admin", "Superadmin","Employee"],
+      key: "/master",
+      icon: <LockFilled />,
+      label: "Timesheet",
+      roles: ["Admin", "Superadmin", "Employee","Team Leader"],
     },
   ];
 

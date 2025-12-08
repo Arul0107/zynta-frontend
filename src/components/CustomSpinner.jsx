@@ -1,23 +1,24 @@
-import React from 'react';
-import { Spin } from 'antd';
-import mySpinnerImage from '../assets/megacrane.gif'; // Update with your actual image path
+import React from "react";
+import { LoadingOutlined } from "@ant-design/icons";
+import { Flex, Spin } from "antd";
+import "./CustomSpinner.css";
 
-const CustomSpinner = ({ tip = "Loading..." }) => {
-  const customIcon = (
-    <img
-      src={mySpinnerImage}
-      alt="Loading..."
-      style={{ width: 100, height: 100 }}
-    />
-  );
-
+const CustomSpinner = ({ message = "Loading data...", fullscreen = false }) => {
   return (
-    <Spin
-      indicator={customIcon}
-      tip={tip}
-      size="large"
-      style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}
+    <div className={fullscreen ? "spinner-wrapper fullscreen" : "spinner-wrapper"}>
+      <Flex align="center" vertical className="spinner-box">
+       <Spin
+  indicator={
+    <LoadingOutlined
+      style={{ fontSize: 50, color: "#122e44" }} // change color here
+      spin
     />
+  }
+  size="large"
+/>
+        <p className="spinner-text">{message}</p>
+      </Flex>
+    </div>
   );
 };
 

@@ -316,8 +316,9 @@ const Customers = () => {
             sorter: true,
         },
         { title: 'Contact Name', dataIndex: 'contactName', sorter: true },
-        { title: 'Email Id', dataIndex: 'email', sorter: true },
-        { title: 'Type', dataIndex: 'type', render: typeTag, sorter: true },
+        { title: 'Email Id', dataIndex: 'contactEmail', sorter: true },
+
+
         {
             title: 'Assigned To',
             dataIndex: ['assignedTo', 'name'],

@@ -13,8 +13,11 @@ import {
   Popconfirm,
   Space,
   Card,
-  Switch,
+  Grid,
 } from "antd";
+import {
+  StopOutlined, // 💡 NEW: Icon for the Stop button
+} from "@ant-design/icons";
 import axios from "../../api/axios";
 import dayjs from "dayjs";
 import toast, { Toaster } from "react-hot-toast";
@@ -24,8 +27,10 @@ const { Title } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 const { RangePicker } = DatePicker;
+const { useBreakpoint } = Grid;
 
 export default function TimeSheetDashboard() {
+  const screens = useBreakpoint();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isEodModalVisible, setIsEodModalVisible] = useState(false);
@@ -38,11 +43,8 @@ export default function TimeSheetDashboard() {
   const [isEodViewModalVisible, setIsEodViewModalVisible] = useState(false);
   const [viewSession, setViewSession] = useState(null);
 
-  // States for Enhancements
   const [excludeSundays, setExcludeSundays] = useState(false);
   const [dateFilterPreset, setDateFilterPreset] = useState('today');
-
-  // 💡 NEW/UPDATED STATE TO CAPTURE ALL TABLE COLUMN FILTERS
   const [tableFilters, setTableFilters] = useState({});
 
   const [stats, setStats] = useState({
@@ -61,9 +63,9 @@ export default function TimeSheetDashboard() {
     email: "guest@example.com",
   };
 
-  const isAdmin = ["Admin", "Superadmin"].includes(currentUser.role);
+  const isAdmin = ["Superadmin"].includes(currentUser.role);
 
-  // --- Utility Functions (UNCHANGED) ---
+  // --- Utility Functions (unchanged) ---
 
   const formatTime = (sec) => {
     const h = Math.floor(Math.abs(sec) / 3600);
@@ -134,8 +136,7 @@ export default function TimeSheetDashboard() {
     });
   };
 
-  // --- Data Fetching (UNCHANGED) ---
-
+  // --- Data Fetching (unchanged) ---
   const fetchAccountsAndServices = async () => {
     try {
       const [accRes, svcRes] = await Promise.all([
@@ -213,7 +214,7 @@ export default function TimeSheetDashboard() {
     }
   };
 
-  // --- Effects (UNCHANGED) ---
+  // --- Effects (unchanged) ---
 
   useEffect(() => {
     fetchAccountsAndServices();
@@ -241,7 +242,6 @@ export default function TimeSheetDashboard() {
 
   // --- Combined Local Filtering Logic ---
 
-  // 💡 Filter sessions based on both Exclude Sundays and Name Filter
   const filteredSessions = useMemo(() => {
     let result = sessions;
 
@@ -257,22 +257,19 @@ export default function TimeSheetDashboard() {
     }
 
     return result;
-  }, [sessions, excludeSundays, tableFilters]); // Depend on tableFilters
+  }, [sessions, excludeSundays, tableFilters]);
 
-  // Update stats whenever the filteredSessions (including Name Filter) changes
+  // Update stats whenever the filteredSessions changes
   useEffect(() => {
     calculateStats(filteredSessions);
   }, [filteredSessions]);
 
   // --- Table Filter Handler ---
-  // 💡 This is the key function to capture standard Ant Design column filters
   const handleTableChange = (pagination, filters, sorter) => {
-    // Filters structure: { columnKey: [selectedValues], anotherColumnKey: [selectedValues] }
     setTableFilters(filters);
   };
 
-  // (Start/Stop/EOD handlers are omitted here for brevity, assuming they are the same as the previous full code block)
-
+  // --- Action Handlers (EOD, Start/Stop, Export - unchanged) ---
   const handleStartWork = async () => {
     const hasRunningSession = Object.values(runningSessions).some(isRunning => isRunning);
     if (hasRunningSession) {
@@ -420,7 +417,7 @@ export default function TimeSheetDashboard() {
   };
 
 
-  // --- Table Columns (REVERTED TO STANDARD FILTER) ---
+  // --- Table Columns ---
 
   const columns = [
     {
@@ -436,14 +433,11 @@ export default function TimeSheetDashboard() {
       title: "Name",
       dataIndex: "name",
       responsive: ['lg'],
-      // 💡 STANDARD ANT DESIGN FILTER IMPLEMENTATION (REVERTED)
       filters: Array.from(new Set(sessions.map(s => s.name))).map(name => ({
         text: name,
         value: name
       })),
       onFilter: (value, record) => record.name === value,
-      // NOTE: Ant Design Table will handle the filtering internally, 
-      // but we capture the selected values in handleTableChange.
       key: 'name',
     },
     { title: "Login", dataIndex: "loginTimeFormatted" },
@@ -501,7 +495,15 @@ export default function TimeSheetDashboard() {
             okText="Yes"
             cancelText="No"
           >
-            <Button type="danger" size="small">Stop</Button>
+            {/* 💡 UPDATED: Icon Button for Stop */}
+            <Button
+              type="text"
+              danger
+              size="small"
+              icon={<StopOutlined />}
+            >
+              Stop
+            </Button>
           </Popconfirm>
         );
       },
@@ -510,16 +512,108 @@ export default function TimeSheetDashboard() {
 
   const hasRunningSessionForCurrentUser = sessions.some(s => s.userId === currentUser._id && runningSessions[s.key]);
 
+  // --- Responsive Render Logic ---
+
+  // Show card view on screens smaller than medium (sm, xs)
+  const isMobileView = !screens.md;
+
+  const renderCardView = () => (
+    <Space direction="vertical" style={{ width: '100%' }}>
+      {/* Using filteredSessions here ensures that the cards reflect the Name filter */}
+      {filteredSessions.map((record) => {
+        const isRunning = runningSessions[record.key];
+        const isCurrentUser = record.userId === currentUser._id;
+        const canStop = isRunning && (isAdmin || isCurrentUser);
+
+        // Determine card color/style based on session state
+        const cardStyle = {
+          borderLeft: `2px solid ${isRunning ? '#52c41a' : (record.logoutTime ? '#1677ff' : '#faad14')}`
+        };
+
+        return (
+          <Card
+            key={record.key}
+            className="timesheet-mobile-card"
+            title={
+              <Row justify="space-between" align="middle">
+                <Title level={5} style={{ margin: 0 }}>
+                  {record.dateLabel}
+                </Title>
+                <Title level={5} style={{ margin: 0 }}>
+                  {record.name}
+                </Title>
+                <span className={isRunning ? "countdown" : (timers[record.key] < 0 ? "overtime" : "")}>
+                  {formatTime(timers[record.key] || 0)}
+                </span>
+              </Row>
+            }
+            extra={
+              canStop ? (
+                <Popconfirm
+                  title="Stop work?"
+                  onConfirm={() => handleStopWork(record.key)}
+                  okText="Yes"
+                  cancelText="No"
+                >
+                  {/* 💡 UPDATED: Icon Button for Stop in Card View */}
+                  <Button
+                    type="text"
+                    danger
+                    size="small"
+                    icon={<StopOutlined />}
+                    style={{ padding: '4px 8px' }}
+                  >
+                    Stop
+                  </Button>
+                </Popconfirm>
+              ) : null
+            }
+            style={cardStyle}
+            loading={loading}
+          >
+            <p><strong>Login:</strong> {record.loginTimeFormatted}</p>
+            <p><strong>Logout:</strong> {record.logoutTimeFormatted || "RUNNING"}</p>
+            <p><strong>Worked:</strong> {formatWorkedTime(record.totalHours)}</p>
+
+            <Space size="middle" style={{ marginTop: 8 }}>
+              {/* EOD Button */}
+              <Button
+                type="link"
+                size="small"
+                onClick={() => {
+                  setSelectedSession(record);
+                  setIsEodModalVisible(true);
+                  form.setFieldsValue({
+                    eod: record.eod || "",
+                    accountIds: record.accountIds?.map(a => a._id) || [],
+                    serviceIds: record.serviceIds?.map(s => s._id) || [],
+                    date: record.date ? dayjs(record.date) : dayjs(record.loginTime),
+                  });
+                }}
+              >
+                EOD ({record.eod ? "Edit" : "Add"})
+              </Button>
+              {/* View EOD Button */}
+              {record.eod && (
+                <Button type="link" size="small" onClick={() => handleViewEod(record)}>View Details</Button>
+              )}
+            </Space>
+          </Card>
+        );
+      })}
+    </Space>
+  );
+
   // --- Main Render ---
 
   return (
     <div className="timesheet-dashboard-container">
       <Toaster position="top-right" reverseOrder={false} />
 
+      {/* Header and Controls */}
       <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
         <Title level={2}>Timesheet Dashboard</Title>
         <Space wrap size="middle">
-
           <Select
             value={dateFilterPreset}
             onChange={handlePresetChange}
@@ -538,11 +632,10 @@ export default function TimeSheetDashboard() {
             disabled={dateFilterPreset !== 'custom'}
           />
 
-          <Button type="primary" onClick={fetchSessions} loading={loading}>
+          <Button type="primary"  className="add-event-button" onClick={fetchSessions} loading={loading}>
             Fetch History
           </Button>
 
-          
           <Button
             onClick={exportToCSV}
             disabled={filteredSessions.length === 0}
@@ -558,26 +651,23 @@ export default function TimeSheetDashboard() {
         </Space>
       </Row>
 
-      {/* Summary Statistics Cards (Now reflects Name Filter) */}
+      {/* Summary Statistics Cards */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col xs={12} sm={6}>
           <Card title="Total Sessions" bordered={false} className="stat-card">
             <Title level={3} style={{ margin: 0 }}>{stats.totalSessions}</Title>
           </Card>
         </Col>
-
         <Col xs={12} sm={6}>
           <Card title="Working Days" bordered={false} className="stat-card">
             <Title level={3} style={{ margin: 0 }}>{stats.uniqueWorkingDays}</Title>
           </Card>
         </Col>
-
         <Col xs={12} sm={6}>
           <Card title="Sessions Stopped" bordered={false} className="stat-card">
             <Title level={3} style={{ margin: 0 }}>{stats.sessionsStopped}</Title>
           </Card>
         </Col>
-
         <Col xs={12} sm={6}>
           <Card title="Total Worked Time" bordered={false} className="stat-card">
             <Title level={3} style={{ margin: 0 }}>{formatWorkedTime(stats.totalWorkedHours)}</Title>
@@ -585,22 +675,24 @@ export default function TimeSheetDashboard() {
         </Col>
       </Row>
 
-      {/* Main Timesheet Table */}
-      <Table
-        columns={columns}
-        dataSource={sessions} // Pass the unfiltered sessions here
-        pagination={false}
-        rowKey="key"
-        loading={loading}
-        scroll={{ x: 'max-content' }}
+      {/* Main Content: Conditional Rendering based on screen size */}
+      {isMobileView ? (
+        // RENDER CARD VIEW FOR MOBILE
+        renderCardView()
+      ) : (
+        // RENDER TABLE VIEW FOR DESKTOP/TABLET
+        <Table
+          columns={columns}
+          dataSource={sessions}
+          pagination={false}
+          rowKey="key"
+          loading={loading}
+          scroll={{ x: 'max-content' }}
+          onChange={handleTableChange}
+        />
+      )}
 
-        // 💡 KEY CHANGE: Use the expanded data source and handle filtering/stats manually
-        // Ant Design's standard filters will filter the displayed table data
-        // We capture the filter state to filter our filteredSessions list for stats.
-        onChange={handleTableChange}
-      />
-
-      {/* EOD Modals (UNCHANGED) */}
+      {/* EOD Modals */}
       <Modal
         title="End of Day Notes"
         open={isEodModalVisible}

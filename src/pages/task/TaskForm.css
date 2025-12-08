@@ -1,0 +1,48 @@
+.zoho-task-drawer .ant-drawer-body {
+  background: #f7f8fa;
+  padding: 20px;
+}
+
+.drawer-header-section {
+  margin-bottom: 10px;
+}
+
+.drawer-title {
+  font-weight: 600;
+}
+
+.zoho-section-card {
+  padding: 18px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  background: white;
+  border: 1px solid #eee;
+}
+
+.zoho-section-card h5 {
+  margin-bottom: 14px;
+  font-weight: 600;
+}
+
+.zoho-form input,
+.zoho-form .ant-select-selector,
+.zoho-datepicker {
+  border-radius: 8px !important;
+  border-color: #dcdcdc !important;
+  height: 40px !important;
+}
+
+.zoho-datepicker {
+  width: 100%;
+  padding: 8px;
+}
+
+.drawer-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 24px;
+  background: white;
+  border-top: 1px solid #eee;
+}
+            
