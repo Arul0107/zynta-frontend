@@ -211,7 +211,7 @@ if (cycle === "Monthly") {
                 <Select mode="multiple" placeholder="Select Lead Type">
                   <Option value="Fixed client">Fixed client</Option>
                   <Option value="Revenue based client">Revenue based client</Option>
-                  <Option value="Vrism Product">Vrism Product</Option>
+                  <Option value="zyntra Product">zyntra Product</Option>
                   <Option value="others">Others</Option>
                 </Select>
               </Form.Item>

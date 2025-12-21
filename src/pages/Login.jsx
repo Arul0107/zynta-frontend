@@ -5,7 +5,7 @@ import axios from "../api/axios";
 import toast from "react-hot-toast";
 import "../css/Login.css";
 import { PresenceContext } from "../context/PresenceContext";
-import logo from "../assets/vrismw.png";
+import logo from "../assets/zyntra.png";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -63,7 +63,7 @@ const Login = () => {
   return (
     <div className="login-wrapper">
       <div className="login-left">
-        <img src={logo} alt="Vrism Logo" className="logo-img" />
+        <img src={logo} alt="zyntra Logo" className="logo-img" />
 
         <Card className="login-card" bordered={false}>
           <h2 className="login-title">Log In</h2>

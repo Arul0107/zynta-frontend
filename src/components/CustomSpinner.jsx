@@ -10,7 +10,7 @@ const CustomSpinner = ({ message = "Loading data...", fullscreen = false }) => {
        <Spin
   indicator={
     <LoadingOutlined
-      style={{ fontSize: 50, color: "#122e44" }} // change color here
+      style={{ fontSize: 50, color: "#4c066e" }} // change color here
       spin
     />
   }

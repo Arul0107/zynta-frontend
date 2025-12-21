@@ -1,7 +1,7 @@
 // FooterComponent.jsx
 import React from 'react';
 import { Layout } from 'antd';
-
+import './Footer.css';
 const { Footer } = Layout;
 
 const FooterComponent = () => {
@@ -9,7 +9,7 @@ const FooterComponent = () => {
     <Footer
       style={{
         textAlign: 'center',
-        backgroundColor: '#132f45',
+        backgroundColor: '#7123c5',
         padding: '16px 50px',
         position: 'relative',
         bottom: 0,
@@ -19,7 +19,7 @@ const FooterComponent = () => {
         color: '#ffffffff',
       }}
     >
-      © {new Date().getFullYear()} All rights are reserved by <strong> <a href="https://megacranesindia.com/" target="_blank" rel="noopener noreferrer"><span className='company'>Vrism</span></a></strong> 
+      © {new Date().getFullYear()} All rights are reserved by <strong> <a href="" target="_blank" rel="noopener noreferrer"><span className='company-name'>zyntra</span></a></strong> 
 
 
     </Footer>

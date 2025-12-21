@@ -360,7 +360,7 @@ const TopNavbar = ({ collapsed, setCollapsed }) => {
             <Badge count={unreadCount} style={{ backgroundColor: "#1677ff" }}>
               <WarningFilled 
                 className="bell-icon"
-                style={{ fontSize: 24, marginLeft: 15 ,color:"#122e44"}}
+                style={{ fontSize: 24, marginLeft: 15 ,color:"#4c066e"}}
               />
             </Badge>
           </Popover>
@@ -370,7 +370,7 @@ const TopNavbar = ({ collapsed, setCollapsed }) => {
         <Dropdown menu={dropdownMenu} trigger={["click"]}>
           <div style={{ cursor: "pointer", position: "relative" }}>
             <Avatar 
-              style={{ fontSize: 24, backgroundColor: "#122e44" }}
+              style={{ fontSize: 24, backgroundColor: "#4c066e" }}
               src={lsUser?.profileImage} // <-- CHANGE: Use profile image URL
             >
               {/* CHANGE: Fallback to first letter only if profileImage is missing */}

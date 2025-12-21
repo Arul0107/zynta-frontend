@@ -3,7 +3,7 @@
   "short_name": "Vrism crm",
   "icons": [
     {
-      "src": "/vrismsmall.png",
+      "src": "/small.png",
       "type": "image/png",
       "sizes": "512x512"
     }
