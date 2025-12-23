@@ -8,7 +8,7 @@ import Chat from "../pages/chat/Chat";
 import Scheduler from "../pages/secdule/Scheduler";
 import ApplyLeave from "../pages/leave/ApplyLeave";
 import ManageLeaves from "../pages/leave/ManageLeaves";
-import AdminAttendance from "../pages/attendance/AdminAttendance";
+import AdminAttendance from "../pages/attendance/AdminAttendance.jsx";
 import ProjectManagement from "../pages/projects/ProjectManagement";
 import ProjectTracking from "../pages/projects/ProjectTracking";
 import ClientProjectDashboard from "../pages/projects/ClientProjectDashboard";
