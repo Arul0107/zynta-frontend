@@ -61,7 +61,7 @@ background-color: #000000; }
 }
 
 .login-button {
-background: linear-gradient(135deg, #2BA66E 0%, #0E2B43 40%, #2BA66E 100%);
+background: linear-gradient(135deg, #882ee9 0%, #ac82da 40%, #2e0658 100%) !important;
 
   border: none;
   height: 42px;
@@ -69,7 +69,7 @@ background: linear-gradient(135deg, #2BA66E 0%, #0E2B43 40%, #2BA66E 100%);
 }
 
 .login-button:hover {
-background: linear-gradient(135deg, #2BA66E 0%, #0E2B43 40%, #2BA66E 100%) !important;
+background: linear-gradient(135deg, #882ee9 0%, #ac82da 40%, #2e0658 100%) !important;
 
   border: none;
   height: 42px;

@@ -72,11 +72,10 @@
 
 
 .inner-content {
-  padding: 24px;
+  padding: 18px;
   background: #fff;
   min-height: 360px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px #4c066e;
 }
 
 /* ============================

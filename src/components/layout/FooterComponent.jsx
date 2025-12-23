@@ -9,7 +9,7 @@ const FooterComponent = () => {
     <Footer
       style={{
         textAlign: 'center',
-        backgroundColor: '#7123c5',
+        backgroundColor: '#370f61ff',
         padding: '16px 50px',
         position: 'relative',
         bottom: 0,

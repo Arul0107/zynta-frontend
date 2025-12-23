@@ -56,13 +56,13 @@
 }
 
 .view-mode-buttons .ant-btn-primary {
-    background-color: #1677ff;
-    border-color: #1677ff;
+    background-color: #882ee9;
+    border-color: #882ee9;
 }
 
 .add-event-button {
-    background-color: #0e2b43;
-    border-color: #0e2b43;
+    background-color: #47157c;
+    border-color: #882ee9;
     color: white;
     font-weight: 600;
     transition: all 0.3s;
