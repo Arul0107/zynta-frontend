@@ -75,19 +75,19 @@ const Sidebar = ({ collapsed }) => {
       roles: ["Admin", "Superadmin", "Employee", "Team Leader"],
       children: [
         
-        {
-          key: "/manage-leaves",
-          label: "ManageLeaves",
-          roles: ["Admin", "Superadmin", "Team Leader"],
-          icon: <UserSwitchOutlined />, // Added Icon
-        },
+        // {
+        //   key: "/manage-leaves",
+        //   label: "ManageLeaves",
+        //   roles: ["Admin", "Superadmin", "Team Leader"],
+        //   icon: <UserSwitchOutlined />, // Added Icon
+        // },
         
-        {
-          key: "/dailyplan",
-          label: "Daily Planner",
-          roles: ["Admin", "Superadmin", "Team Leader", "Employee"],
-          icon: <CalendarOutlined />, // Added Icon
-        },
+        // {
+        //   key: "/dailyplan",
+        //   label: "Daily Planner",
+        //   roles: ["Admin", "Superadmin", "Team Leader", "Employee"],
+        //   icon: <CalendarOutlined />, // Added Icon
+        // },
         {
           key: "/attendance",
           label: "TimeSheet",
@@ -179,12 +179,12 @@ const Sidebar = ({ collapsed }) => {
           label: "Wallets",
           roles: ["Admin", "Superadmin", "Team Leader", "Employee"],
         },
-        {
-          key: "/chat",
-          icon: <MessageOutlined />,
-          label: "Chat",
-          roles: ["Admin", "Superadmin", "Team Leader", "Employee"],
-        },
+        // {
+        //   key: "/chat",
+        //   icon: <MessageOutlined />,
+        //   label: "Chat",
+        //   roles: ["Admin", "Superadmin", "Team Leader", "Employee"],
+        // },
         {
           key: "/master",
           icon: <SecurityScanOutlined />,
